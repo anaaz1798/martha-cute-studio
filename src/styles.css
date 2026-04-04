@@ -1,0 +1,4 @@
+body { background: #f2f2f7; font-family: sans-serif; }
+.iphone-container { max-width: 400px; margin: 0 auto; padding: 20px; text-align: center; }
+.greeting { color: #ffb6c1; }
+.glass-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }

@@ -1,19 +1,16 @@
 import { supabase } from './supabase'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import './styles.css'
 
 export default function App() {
   const [sesion, setSesion] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [cargando, setCargando] = useState(false);
-  const [citas, setCitas] = useState([]);
-  
-  // Estados para el formulario de clientas
   const [nombre, setNombre] = useState('');
   const [catSeleccionada, setCatSeleccionada] = useState(null);
   const [subCatSeleccionada, setSubCatSeleccionada] = useState('');
   const [detalles, setDetalles] = useState('');
+  const [citas, setCitas] = useState([]);
 
   const CORREO_ADMIN = "ana.az1798@gmail.com"; 
 
@@ -24,168 +21,115 @@ export default function App() {
     { id: 'maquillaje', nombre: 'Maquillaje', icono: '💄', color: '#a2d2ff', opciones: ['Social', 'Novias', 'Noche', 'Clases'] }
   ];
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSesion(session);
-      if (session?.user.email === CORREO_ADMIN) cargarDatosAdmin();
-    });
-  }, []);
-
-  const cargarDatosAdmin = async () => {
-    const { data } = await supabase.from('citas').select('*').order('created_at', { ascending: false });
-    setCitas(data || []);
-  };
-
-  const handleAuth = async (e) => {
+  // Función de Login Reforzada
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setCargando(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      alert("Error: " + error.message);
-      setCargando(false);
-    } else if (data.session) {
-      window.location.reload();
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password
+      });
+
+      if (error) {
+        alert("Pana, algo pasó: " + error.message);
+        return;
+      }
+
+      if (data.session) {
+        setSesion(data.session);
+        if (data.session.user.email === CORREO_ADMIN) {
+          const { data: lista } = await supabase.from('citas').select('*').order('created_at', { ascending: false });
+          setCitas(lista || []);
+        }
+      }
+    } catch (err) {
+      alert("Error crítico de código: " + err.message);
     }
   };
 
-  const handleCerrarSesion = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
-
-  // --- VISTA LOGIN ---
+  // 1. PANTALLA DE LOGIN (Si no hay sesión)
   if (!sesion) {
     return (
       <div className="iphone-container">
         <h1 className="greeting">Martha Cute Studio ✨</h1>
         <div className="glass-card">
-          <form onSubmit={handleAuth}>
-            <input type="email" placeholder="Correo" value={email} onChange={(e)=>setEmail(e.target.value)} className="input-luxury" required />
-            <input type="password" placeholder="Contraseña" value={password} onChange={(e)=>setPassword(e.target.value)} className="input-luxury" required />
-            <button type="submit" className="btn-luxury" disabled={cargando}>{cargando ? "Cargando..." : "Entrar"}</button>
+          <form onSubmit={handleLogin}>
+            <input type="email" placeholder="Correo" value={email} onChange={(e) => setEmail(e.target.value)} className="input-luxury" required />
+            <input type="password" placeholder="Clave" value={password} onChange={(e) => setPassword(e.target.value)} className="input-luxury" required />
+            <button type="submit" className="btn-luxury">Entrar al Studio 🚀</button>
           </form>
         </div>
       </div>
     );
   }
 
-  // --- VISTA PANEL ADMINISTRACIÓN (EL DE LA FOTO) ---
+  // 2. PANEL JEFA (Si el correo es el tuyo)
   if (sesion.user.email === CORREO_ADMIN) {
     return (
-      <div className="admin-dashboard">
-        {/* Banner Superior */}
-        <div className="admin-banner">
-          <div className="banner-content">
-            <div className="banner-text">
-              <h1>Martha Cute Studio ✨</h1>
-              <p>Panel de Administración</p>
-              <h3>¡Hola, Ana! Bienvenido a tu Panel Jefa 👑</h3>
-            </div>
-            <button onClick={handleCerrarSesion} className="btn-logout-admin">Cerrar Sesión (Ana)</button>
+      <div className="admin-dashboard" style={{backgroundColor: '#fce4ec', minHeight: '100vh', padding: '20px'}}>
+        <div className="admin-banner" style={{background: 'linear-gradient(90deg, #ffc1e3, #e1bee7)', padding: '25px', borderRadius: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+          <div>
+            <h1 style={{margin: 0, fontSize: '24px'}}>Martha Cute Studio ✨</h1>
+            <p style={{margin: 0}}>Panel de Administración</p>
+            <h3 style={{marginTop: '10px'}}>¡Hola, Ana! Bienvenida Jefa 👑</h3>
           </div>
+          <button onClick={() => window.location.reload()} className="btn-logout-mini">Salir</button>
         </div>
-
-        <div className="dashboard-grid">
-          {/* Citas de Hoy */}
-          <div className="dash-card">
-            <div className="card-header">
-              <span className="icon-bg">📅</span>
-              <h2>Citas de Hoy</h2>
-            </div>
-            <table className="dash-table">
-              <thead>
-                <tr><th>Nombre</th><th>Servicio</th><th>Estado</th></tr>
-              </thead>
-              <tbody>
-                {citas.slice(0, 3).map(c => (
-                  <tr key={c.id}>
-                    <td>{c.nombre}</td>
-                    <td>{c.servicio.split(':')[1]}</td>
-                    <td><span className="status-pill">Pendiente</span></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        
+        <div className="dashboard-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px'}}>
+          <div className="dash-card" style={{background: 'white', padding: '20px', borderRadius: '20px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}}>
+            <h3 style={{borderBottom: '2px solid #fce4ec', paddingBottom: '10px'}}>📬 Solicitudes Nuevas</h3>
+            {citas.length > 0 ? citas.map(c => (
+              <div key={c.id} style={{padding: '10px 0', borderBottom: '1px solid #eee'}}>
+                <strong>{c.nombre}</strong> - {c.servicio}
+              </div>
+            )) : <p>No hay citas registradas.</p>}
           </div>
-
-          {/* Solicitudes Nuevas */}
-          <div className="dash-card">
-            <div className="card-header">
-              <span className="icon-bg">📬</span>
-              <h2>Solicitudes Nuevas</h2>
-            </div>
-            <div className="solicitudes-list">
-              {citas.length > 0 ? citas.map(c => (
-                <div key={c.id} className="solicitud-item">
-                  <p><strong>{c.nombre}</strong> - {c.servicio}</p>
-                  <button onClick={() => window.open(`https://wa.me/584121663968`, '_blank')} className="btn-mini-wa">Contactar</button>
-                </div>
-              )) : <p>No hay solicitudes nuevas</p>}
-            </div>
-          </div>
-
-          {/* Gestión de Catálogo */}
-          <div className="dash-card">
-            <div className="card-header">
-              <span className="icon-bg">🎨</span>
-              <h2>Gestión de Catálogo</h2>
-            </div>
-            <div className="cat-stats">
-              {menuStudio.map(cat => (
-                <div key={cat.id} className="stat-pill">
-                  <strong>{cat.nombre}</strong>
-                  <span>{cat.opciones.length} servicios</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Notificaciones flotantes simuladas */}
-        <div className="notif-toast">
-          <p>🔔 Nueva solicitud recibida hace 2 mins</p>
         </div>
       </div>
     );
   }
 
-  // --- VISTA CLIENTAS (BANNERS E ICONOS) ---
+  // 3. VISTA CLIENTA (Banners e Iconos)
   return (
     <div className="iphone-container">
-      <div style={{textAlign: 'right'}}><button onClick={handleCerrarSesion} className="btn-logout-mini">Cerrar Sesión</button></div>
+      <div style={{textAlign: 'right'}}><button onClick={() => window.location.reload()} className="btn-logout-mini">Salir</button></div>
       <h1 className="greeting">¿Qué nos hacemos hoy?</h1>
       
       {!catSeleccionada ? (
-        <div className="category-grid">
+        <div className="category-grid" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
           {menuStudio.map((cat) => (
-            <div key={cat.id} className="category-card" onClick={() => { setCatSeleccionada(cat); setSubCatSeleccionada(cat.opciones[0]); }} style={{ backgroundColor: cat.color }}>
-              <span className="cat-icon">{cat.icono}</span>
-              <h3>{cat.nombre}</h3>
+            <div key={cat.id} className="category-card" onClick={() => { setCatSeleccionada(cat); setSubCatSeleccionada(cat.opciones[0]); }} style={{ backgroundColor: cat.color, padding: '20px', borderRadius: '20px', textAlign: 'center', cursor: 'pointer' }}>
+              <span style={{fontSize: '40px', display: 'block'}}>{cat.icono}</span>
+              <h3 style={{marginTop: '10px'}}>{cat.nombre}</h3>
             </div>
           ))}
         </div>
       ) : (
-        <div className="glass-card animate-fade">
-          <button onClick={() => setCatSeleccionada(null)} className="btn-back">⬅ Volver</button>
-          <h2>{catSeleccionada.icono} {catSeleccionada.nombre}</h2>
+        <div className="glass-card">
+          <button onClick={() => setCatSeleccionada(null)} className="btn-back" style={{color: 'white', background: 'none', border: 'none', cursor: 'pointer'}}>⬅ Volver</button>
+          <h2 style={{color: 'white', margin: '15px 0'}}>{catSeleccionada.icono} {catSeleccionada.nombre}</h2>
           <form onSubmit={async (e) => {
             e.preventDefault();
             const { error } = await supabase.from('citas').insert([{ nombre, servicio: `${catSeleccionada.nombre}: ${subCatSeleccionada}`, fecha: detalles }]);
             if (error) alert(error.message);
             else {
-              window.open(`https://wa.me/584121663968?text=${encodeURIComponent(`¡Hola! Soy ${nombre}. Cita para ${catSeleccionada.nombre}: ${subCatSeleccionada}. ${detalles}`)}`, '_blank');
-              alert("¡Solicitud enviada!");
+              window.open(`https://wa.me/584121663968?text=Hola! Soy ${nombre}, quiero cita para ${subCatSeleccionada}`, '_blank');
               setCatSeleccionada(null);
             }
           }}>
-            <input type="text" value={nombre} onChange={(e)=>setNombre(e.target.value)} placeholder="Tu nombre" required className="input-luxury"/>
+            <input type="text" placeholder="Tu nombre" value={nombre} onChange={(e)=>setNombre(e.target.value)} className="input-luxury" required />
             <select value={subCatSeleccionada} onChange={(e)=>setSubCatSeleccionada(e.target.value)} className="input-luxury">
-              {catSeleccionada.opciones.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+              {catSeleccionada.opciones.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
-            <textarea value={detalles} onChange={(e)=>setDetalles(e.target.value)} placeholder="Detalles extra..." className="input-luxury" />
-            <button type="submit" className="btn-luxury">Solicitar Cita 📱</button>
+            <textarea placeholder="Detalles extra..." value={detalles} onChange={(e)=>setDetalles(e.target.value)} className="input-luxury" style={{marginTop: '10px'}} />
+            <button type="submit" className="btn-luxury" style={{marginTop: '15px'}}>Solicitar Cita 📱</button>
           </form>
         </div>
+      )}
+    </div>
+  );
+}
       )}
     </div>
   );

@@ -15,13 +15,11 @@ export default function App() {
   const CORREO_ADMIN = "ana.az1798@gmail.com"; 
 
   useEffect(() => {
-    // Revisa sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSesion(session);
       if (session?.user.email === CORREO_ADMIN) cargarCitas();
     });
 
-    // ESCUCHA EL LOGIN EN TIEMPO REAL (Para no tener que refrescar)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSesion(session);
       if (session?.user.email === CORREO_ADMIN) cargarCitas();
@@ -38,11 +36,18 @@ export default function App() {
     setCitas(data || []);
   };
 
+  // --- EL ARREGLO ESTÁ AQUÍ (FUERZA BRUTA) ---
   const handleAuth = async (tipo) => {
-    const { error } = tipo === 'login' 
+    const { data, error } = tipo === 'login' 
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password });
-    if (error) alert(error.message);
+    
+    if (error) {
+      alert(error.message);
+    } else if (data.session) {
+      // Si el login es exitoso, obligamos a la página a recargar para que entre al panel
+      window.location.reload();
+    }
   };
 
   const handleSubmitPresupuesto = async (e) => {
@@ -78,7 +83,7 @@ export default function App() {
       <div className="iphone-container">
         <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
           <h1 className="greeting" style={{fontSize: '20px'}}>Panel Jefa 👑</h1>
-          <button onClick={() => supabase.auth.signOut()} style={{width:'auto', padding:'5px 10px', fontSize:'12px', backgroundColor:'#ff4d4d'}}>Salir</button>
+          <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} style={{width:'auto', padding:'5px 10px', fontSize:'12px', backgroundColor:'#ff4d4d'}}>Salir</button>
         </div>
         <div className="lista-citas">
           {citas.map((cita) => (
@@ -96,7 +101,7 @@ export default function App() {
 
   return (
     <div className="iphone-container">
-      <div style={{textAlign: 'right'}}><button onClick={() => supabase.auth.signOut()} style={{width:'auto', padding:'5px'}}>Salir</button></div>
+      <div style={{textAlign: 'right'}}><button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} style={{width:'auto', padding:'5px'}}>Salir</button></div>
       <h1 className="greeting">Presupuesto</h1>
       <div className="glass-card">
         <form onSubmit={handleSubmitPresupuesto}>

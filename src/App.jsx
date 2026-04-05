@@ -22,14 +22,18 @@ export default function App() {
   ];
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSesion(session);
       if (session?.user.email === CORREO_ADMIN) cargarCitas();
-    });
+    };
+    checkUser();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSesion(session);
       if (session?.user.email === CORREO_ADMIN) cargarCitas();
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -38,12 +42,14 @@ export default function App() {
     setCitas(data || []);
   };
 
-  const handleAuth = async (tipo) => {
-    const { data, error } = tipo === 'login' 
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
-    if (error) alert(error.message);
-    else if (data.session) window.location.reload(); // ESTO FUERZA LA ENTRADA
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) alert("Error: " + error.message);
+    if (data?.session) {
+      // ESTO ES LO QUE IMPORTA: Forzar recarga total
+      window.location.href = window.location.origin;
+    }
   };
 
   if (!sesion) {
@@ -51,9 +57,11 @@ export default function App() {
       <div className="iphone-container">
         <h1 className="greeting">Martha Cute Studio ✨</h1>
         <div className="glass-card">
-          <input type="email" placeholder="Correo" value={email} onChange={(e)=>setEmail(e.target.value)} className="input-luxury" />
-          <input type="password" placeholder="Contraseña" value={password} onChange={(e)=>setPassword(e.target.value)} className="input-luxury" />
-          <button onClick={() => handleAuth('login')} className="btn-luxury">Entrar</button>
+          <form onSubmit={handleAuth}>
+            <input type="email" placeholder="Correo" value={email} onChange={(e)=>setEmail(e.target.value)} className="input-luxury" required />
+            <input type="password" placeholder="Contraseña" value={password} onChange={(e)=>setPassword(e.target.value)} className="input-luxury" required />
+            <button type="submit" className="btn-luxury">Entrar</button>
+          </form>
         </div>
       </div>
     );
@@ -64,7 +72,7 @@ export default function App() {
       <div className="iphone-container">
         <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '20px'}}>
           <h1 className="greeting" style={{fontSize: '20px'}}>Panel Jefa 👑</h1>
-          <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="btn-outline" style={{width:'auto', padding:'5px 10px'}}>Salir</button>
+          <button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="btn-outline" style={{width:'auto', padding:'5px 10px'}}>Salir</button>
         </div>
         <div className="lista-citas">
           {citas.map((cita) => (
@@ -81,7 +89,7 @@ export default function App() {
 
   return (
     <div className="iphone-container">
-      <div style={{textAlign: 'right'}}><button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="btn-logout-mini">Cerrar Sesión</button></div>
+      <div style={{textAlign: 'right'}}><button onClick={async () => { await supabase.auth.signOut(); window.location.reload(); }} className="btn-logout-mini">Cerrar Sesión</button></div>
       <h1 className="greeting">¿Qué nos hacemos hoy?</h1>
       {!catSeleccionada ? (
         <div className="category-grid">

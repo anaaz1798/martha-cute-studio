@@ -7,7 +7,6 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [citas, setCitas] = useState([]);
-  
   const [nombre, setNombre] = useState('');
   const [catSeleccionada, setCatSeleccionada] = useState(null);
   const [subCatSeleccionada, setSubCatSeleccionada] = useState('');
@@ -44,22 +43,7 @@ export default function App() {
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password });
     if (error) alert(error.message);
-    else if (data.session) window.location.reload();
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const servicioFinal = `${catSeleccionada.nombre}: ${subCatSeleccionada}`;
-    const { error } = await supabase.from('citas').insert([{ 
-      nombre, servicio: servicioFinal, fecha: detalles 
-    }]);
-    if (error) alert(error.message);
-    else {
-      const mensaje = `¡Hola Martha! ✨ Soy ${nombre}. Quiero cita para ${servicioFinal}. ${detalles}`;
-      window.open(`https://wa.me/584121663968?text=${encodeURIComponent(mensaje)}`, '_blank');
-      alert("¡Solicitud enviada! 💅");
-      setCatSeleccionada(null); setNombre(''); setDetalles('');
-    }
+    else if (data.session) window.location.reload(); // ESTO FUERZA LA ENTRADA
   };
 
   if (!sesion) {
@@ -70,7 +54,6 @@ export default function App() {
           <input type="email" placeholder="Correo" value={email} onChange={(e)=>setEmail(e.target.value)} className="input-luxury" />
           <input type="password" placeholder="Contraseña" value={password} onChange={(e)=>setPassword(e.target.value)} className="input-luxury" />
           <button onClick={() => handleAuth('login')} className="btn-luxury">Entrar</button>
-          <button onClick={() => handleAuth('registro')} className="btn-outline">Registrarme</button>
         </div>
       </div>
     );
@@ -100,7 +83,6 @@ export default function App() {
     <div className="iphone-container">
       <div style={{textAlign: 'right'}}><button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="btn-logout-mini">Cerrar Sesión</button></div>
       <h1 className="greeting">¿Qué nos hacemos hoy?</h1>
-      
       {!catSeleccionada ? (
         <div className="category-grid">
           {menuStudio.map((cat) => (
@@ -114,12 +96,17 @@ export default function App() {
         <div className="glass-card animate-fade">
           <button onClick={() => setCatSeleccionada(null)} className="btn-back">⬅ Volver</button>
           <h2 style={{color: 'white', marginBottom: '15px'}}>{catSeleccionada.icono} {catSeleccionada.nombre}</h2>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const { error } = await supabase.from('citas').insert([{ nombre, servicio: `${catSeleccionada.nombre}: ${subCatSeleccionada}`, fecha: detalles }]);
+            if (error) alert(error.message);
+            else { window.open(`https://wa.me/584121663968?text=${encodeURIComponent(`¡Hola! Soy ${nombre}. Cita para ${catSeleccionada.nombre}: ${subCatSeleccionada}. ${detalles}`)}`, '_blank'); alert("Enviado"); setCatSeleccionada(null); }
+          }}>
             <input type="text" value={nombre} onChange={(e)=>setNombre(e.target.value)} placeholder="Tu nombre" required className="input-luxury"/>
             <select value={subCatSeleccionada} onChange={(e)=>setSubCatSeleccionada(e.target.value)} className="input-luxury">
               {catSeleccionada.opciones.map(sub => <option key={sub} value={sub}>{sub}</option>)}
             </select>
-            <textarea value={detalles} onChange={(e)=>setDetalles(e.target.value)} placeholder="Detalles adicionales..." className="input-luxury" />
+            <textarea value={detalles} onChange={(e)=>setDetalles(e.target.value)} placeholder="Detalles..." className="input-luxury" />
             <button type="submit" className="btn-luxury">Solicitar Cita 📱</button>
           </form>
         </div>

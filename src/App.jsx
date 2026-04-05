@@ -9,28 +9,35 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [cargando, setCargando] = useState(false);
   const [citas, setCitas] = useState([]);
-  const [catSeleccionada, setCatSeleccionada] = useState(null);
-  const [subCatSeleccionada, setSubCatSeleccionada] = useState('');
 
   useEffect(() => {
-    // Al cargar, vemos si ya hay alguien logueado
-    const checkUser = async () => {
+    const validarUsuario = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setSesion(session);
-        // Buscamos el rol en la tabla de perfiles
-        const { data } = await supabase
+        // Intentamos buscar tu rol
+        let { data: perfil } = await supabase
           .from('perfiles')
           .select('rol')
           .eq('id', session.user.id)
           .single();
-        
-        if (data) setRol(data.rol);
-        if (data?.rol === 'admin') cargarCitas();
+
+        // Si no existes en la tabla, te creamos
+        if (!perfil) {
+          const esAdmin = session.user.email === "ana.az1798@gmail.com";
+          const nuevoRol = esAdmin ? 'admin' : 'cliente';
+          await supabase.from('perfiles').insert([
+            { id: session.user.id, email: session.user.email, rol: nuevoRol }
+          ]);
+          setRol(nuevoRol);
+        } else {
+          setRol(perfil.rol);
+        }
       }
     };
-    checkUser();
-  }, []);
+    validarUsuario();
+    if (rol === 'admin') cargarCitas();
+  }, [rol]);
 
   const cargarCitas = async () => {
     const { data } = await supabase.from('citas').select('*').order('created_at', { ascending: false });
@@ -41,17 +48,14 @@ export default function App() {
     e.preventDefault();
     setCargando(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
     if (error) {
       alert("Error: " + error.message);
       setCargando(false);
     } else {
-      // Forzamos recarga para que el useEffect detecte el nuevo usuario
       window.location.reload();
     }
   };
 
-  // --- LOGIN ---
   if (!sesion) {
     return (
       <div className="iphone-container">
@@ -67,37 +71,34 @@ export default function App() {
     );
   }
 
-  // --- VISTA JEFA (Si el rol es admin) ---
+  // --- VISTA ADMINISTRADORA (Lo que querías ver) ---
   if (rol === 'admin') {
     return (
-      <div className="admin-dashboard">
-        <div className="admin-banner">
-          <h1>Panel Jefa 👑</h1>
+      <div className="admin-dashboard" style={{padding: '20px', backgroundColor: '#fce4ec', minHeight: '100vh'}}>
+        <div className="admin-banner" style={{background: 'linear-gradient(90deg, #ffc1e3, #e1bee7)', padding: '20px', borderRadius: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+          <h2 style={{margin:0, color: '#880e4f'}}>Dashboard Jefa 👑</h2>
           <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="btn-logout-mini">Salir</button>
         </div>
-        <div className="dash-card">
-          <h3>Solicitudes Recibidas</h3>
-          {citas.map(c => <div key={c.id} className="solicitud-item">{c.nombre} - {c.servicio}</div>)}
+        <div className="dashboard-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px'}}>
+          <div className="dash-card" style={{background: 'white', padding: '20px', borderRadius: '15px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}}>
+            <h3 style={{borderBottom: '2px solid #fce4ec', paddingBottom: '10px'}}>📬 Citas Nuevas</h3>
+            {citas.length > 0 ? citas.map(c => (
+              <div key={c.id} style={{padding: '10px 0', borderBottom: '1px solid #eee'}}>
+                <strong>{c.nombre}</strong> - {c.servicio}
+              </div>
+            )) : <p>Esperando clientes...</p>}
+          </div>
         </div>
       </div>
     );
   }
 
-  // --- VISTA CLIENTE (Cuadros y Iconos) ---
+  // --- VISTA CLIENTE ---
   return (
     <div className="iphone-container">
-      <h1 className="greeting">¿Qué nos hacemos hoy?</h1>
-      <div className="category-grid">
-        <div className="category-card" onClick={() => alert("Pronto!")} style={{backgroundColor: '#ffafcc'}}>
-          <span style={{fontSize:'40px'}}>💅</span>
-          <h3>Uñas</h3>
-        </div>
-        <div className="category-card" onClick={() => alert("Pronto!")} style={{backgroundColor: '#bde0fe'}}>
-          <span style={{fontSize:'40px'}}>💇‍♀️</span>
-          <h3>Cabello</h3>
-        </div>
-      </div>
-      <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="btn-logout-mini">Cerrar Sesión</button>
+      <h1 className="greeting">Bienvenida al Studio</h1>
+      <p style={{color: 'white', textAlign: 'center'}}>Pronto verás nuestro catálogo aquí.</p>
+      <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="btn-logout-mini" style={{marginTop: '20px'}}>Cerrar Sesión</button>
     </div>
   );
 }

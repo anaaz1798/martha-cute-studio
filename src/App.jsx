@@ -4,34 +4,34 @@ import './styles.css'
 
 export default function App() {
   const [nombre, setNombre] = useState('');
-  const [servicio, setServicio] = useState('Manicura Sencilla');
-  const [fecha, setFecha] = useState('');
+  const [tecnica, setTecnica] = useState('Balayage');
+  const [detalles, setDetalles] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 1. Guardamos los datos en la tabla 'citas' de Supabase
+    // Guardamos en la base de datos (columna servicio y fecha)
     const { data, error } = await supabase
       .from('citas')
-      .insert([{ nombre, servicio, fecha }]);
+      .insert([{ 
+        nombre: nombre, 
+        servicio: 'Presupuesto de Color: ' + tecnica, 
+        fecha: detalles // Guardamos la descripción del pelo aquí
+      }]);
 
     if (error) {
-      alert("Error guardando en la base de datos: " + error.message);
+      alert("Error: " + error.message);
     } else {
-      // 2. Preparamos el mensaje de WhatsApp para tu hermana
       const numeroHermana = "584121663968"; 
-      const mensaje = `¡Hola Martha! ✨ Soy ${nombre}, me gustaría agendar una cita para *${servicio}* el día *${fecha}*. ¿Me confirmas si tienes disponibilidad? 💅`;
+      const mensaje = `¡Hola Martha! ✨\n\nNecesito un *Presupuesto de Color*:\n\n👤 *Nombre:* ${nombre}\n🎨 *Técnica:* ${tecnica}\n📝 *Detalles del cabello:* ${detalles}`;
       
       const urlWhatsapp = `https://wa.me/${numeroHermana}?text=${encodeURIComponent(mensaje)}`;
       
-      alert("¡Cita registrada con éxito! Ahora te llevaremos a WhatsApp para confirmar con Martha. 🚀");
-      
-      // 3. Esto abre el chat de WhatsApp automáticamente
+      alert("¡Solicitud lista! Dale a 'Aceptar' para enviársela a Martha por WhatsApp.");
       window.open(urlWhatsapp, '_blank');
 
-      // Limpiamos el formulario
       setNombre('');
-      setFecha('');
+      setDetalles('');
     }
   };
 
@@ -39,6 +39,8 @@ export default function App() {
     <div className="iphone-container">
       <h1 className="greeting">Martha Cute Studio ✨</h1>
       <div className="glass-card">
+        <h2 style={{textAlign: 'center', color: '#ff85a2', marginBottom: '20px'}}>Presupuesto de Color</h2>
+        
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           
           <label style={{fontWeight: 'bold'}}>Nombre de la clienta:</label>
@@ -47,44 +49,44 @@ export default function App() {
             value={nombre} 
             onChange={(e) => setNombre(e.target.value)} 
             required 
-            placeholder="Ej: Ana Pérez" 
-            style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+            placeholder="Escribe tu nombre" 
+            style={{ padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }}
           />
 
-          <label style={{fontWeight: 'bold'}}>¿Qué servicio buscas?</label>
+          <label style={{fontWeight: 'bold'}}>Técnica que deseas:</label>
           <select 
-            value={servicio} 
-            onChange={(e) => setServicio(e.target.value)}
-            style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+            value={tecnica} 
+            onChange={(e) => setTecnica(e.target.value)}
+            style={{ padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: 'white' }}
           >
-            <option value="Manicura Sencilla">Manicura Sencilla</option>
-            <option value="Uñas Acrílicas">Uñas Acrílicas</option>
-            <option value="Pedicura">Pedicura</option>
-            <option value="Sistemas / Retoque">Sistemas / Retoque</option>
-            <option value="Diseño a Mano Alzada">Diseño a Mano Alzada</option>
+            <option value="Balayage">Balayage</option>
+            <option value="Mechas / Rayitos">Mechas / Rayitos</option>
+            <option value="Tinte Global (Todo el pelo)">Tinte Global</option>
+            <option value="Decoloración + Color Fantasía">Color Fantasía</option>
+            <option value="Corrección de Color">Corrección de Color</option>
           </select>
 
-          <label style={{fontWeight: 'bold'}}>Fecha y Hora sugerida:</label>
-          <input 
-            type="datetime-local" 
-            value={fecha} 
-            onChange={(e) => setFecha(e.target.value)} 
-            required 
-            style={{ padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}
+          <label style={{fontWeight: 'bold'}}>Cuéntame de tu cabello:</label>
+          <textarea 
+            value={detalles} 
+            onChange={(e) => setDetalles(e.target.value)} 
+            required
+            placeholder="Ej: Lo tengo negro por los hombros, nunca me he pintado o tengo tinte viejo..." 
+            style={{ padding: '12px', borderRadius: '10px', border: '1px solid #ddd', height: '120px', resize: 'none' }}
           />
 
           <button type="submit" style={{ 
-            padding: '12px', 
+            padding: '15px', 
             backgroundColor: '#ff85a2', 
             color: 'white', 
             border: 'none', 
-            borderRadius: '25px', 
-            fontSize: '16px', 
-            fontWeight: 'bold',
+            borderRadius: '30px', 
+            fontWeight: 'bold', 
+            fontSize: '16px',
             cursor: 'pointer',
-            marginTop: '10px'
+            boxShadow: '0 4px 10px rgba(255, 133, 162, 0.3)'
           }}>
-            Agendar y Confirmar por WhatsApp 💅
+            Pedir Presupuesto a Martha 📱
           </button>
         </form>
       </div>

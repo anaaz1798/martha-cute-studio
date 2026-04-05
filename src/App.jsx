@@ -1,95 +1,84 @@
 import { supabase } from './supabase'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './styles.css'
 
 export default function App() {
+  const [sesion, setSesion] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [nombre, setNombre] = useState('');
   const [tecnica, setTecnica] = useState('Balayage');
   const [detalles, setDetalles] = useState('');
 
-  const handleSubmit = async (e) => {
+  // 1. Revisar si la clienta ya inició sesión
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSesion(session)
+    })
+  }, [])
+
+  // 2. Función para Registrarse o Iniciar Sesión
+  const handleAuth = async (tipo) => {
+    const { error } = tipo === 'login' 
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password });
+
+    if (error) alert("Error: " + error.message);
+    else if (tipo === 'registro') alert("¡Revisa tu correo para confirmar!");
+  };
+
+  const handleSubmitPresupuesto = async (e) => {
     e.preventDefault();
-    
-    // Guardamos en la base de datos (columna servicio y fecha)
-    const { data, error } = await supabase
-      .from('citas')
-      .insert([{ 
-        nombre: nombre, 
-        servicio: 'Presupuesto de Color: ' + tecnica, 
-        fecha: detalles // Guardamos la descripción del pelo aquí
-      }]);
+    const { error } = await supabase.from('citas').insert([{ 
+      nombre, servicio: 'Presupuesto de Color: ' + tecnica, fecha: detalles 
+    }]);
 
-    if (error) {
-      alert("Error: " + error.message);
-    } else {
-      const numeroHermana = "584121663968"; 
-      const mensaje = `¡Hola Martha! ✨\n\nNecesito un *Presupuesto de Color*:\n\n👤 *Nombre:* ${nombre}\n🎨 *Técnica:* ${tecnica}\n📝 *Detalles del cabello:* ${detalles}`;
-      
-      const urlWhatsapp = `https://wa.me/${numeroHermana}?text=${encodeURIComponent(mensaje)}`;
-      
-      alert("¡Solicitud lista! Dale a 'Aceptar' para enviársela a Martha por WhatsApp.");
-      window.open(urlWhatsapp, '_blank');
-
-      setNombre('');
-      setDetalles('');
+    if (error) alert("Error: " + error.message);
+    else {
+      const mensaje = `¡Hola Martha! ✨ Soy ${nombre}. Mi usuario es ${sesion.user.email}. Necesito presupuesto para ${tecnica}: ${detalles}`;
+      window.open(`https://wa.me/584121663968?text=${encodeURIComponent(mensaje)}`, '_blank');
+      setNombre(''); setDetalles('');
     }
   };
 
+  // --- VISTA DE LOGIN ---
+  if (!sesion) {
+    return (
+      <div className="iphone-container">
+        <h1 className="greeting">Martha Cute Studio ✨</h1>
+        <div className="glass-card">
+          <h2 style={{textAlign: 'center', color: '#ff85a2'}}>Bienvenida</h2>
+          <input type="email" placeholder="Correo electrónico" value={email} onChange={(e)=>setEmail(e.target.value)} style={inputStyle} />
+          <input type="password" placeholder="Contraseña" value={password} onChange={(e)=>setPassword(e.target.value)} style={inputStyle} />
+          <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
+            <button onClick={() => handleAuth('login')} style={btnStyle}>Entrar</button>
+            <button onClick={() => handleAuth('registro')} style={{...btnStyle, backgroundColor: '#ccc'}}>Registrarme</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // --- VISTA DE FORMULARIO (Cuando ya entró) ---
   return (
     <div className="iphone-container">
-      <h1 className="greeting">Martha Cute Studio ✨</h1>
+      <div style={{textAlign: 'right'}}><button onClick={() => supabase.auth.signOut()} style={{fontSize: '12px'}}>Salir</button></div>
+      <h1 className="greeting">Presupuesto de Color</h1>
       <div className="glass-card">
-        <h2 style={{textAlign: 'center', color: '#ff85a2', marginBottom: '20px'}}>Presupuesto de Color</h2>
-        
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          
-          <label style={{fontWeight: 'bold'}}>Nombre de la clienta:</label>
-          <input 
-            type="text" 
-            value={nombre} 
-            onChange={(e) => setNombre(e.target.value)} 
-            required 
-            placeholder="Escribe tu nombre" 
-            style={{ padding: '12px', borderRadius: '10px', border: '1px solid #ddd' }}
-          />
-
-          <label style={{fontWeight: 'bold'}}>Técnica que deseas:</label>
-          <select 
-            value={tecnica} 
-            onChange={(e) => setTecnica(e.target.value)}
-            style={{ padding: '12px', borderRadius: '10px', border: '1px solid #ddd', backgroundColor: 'white' }}
-          >
+        <form onSubmit={handleSubmitPresupuesto} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required placeholder="Tu nombre" style={inputStyle} />
+          <select value={tecnica} onChange={(e) => setTecnica(e.target.value)} style={inputStyle}>
             <option value="Balayage">Balayage</option>
-            <option value="Mechas / Rayitos">Mechas / Rayitos</option>
-            <option value="Tinte Global (Todo el pelo)">Tinte Global</option>
-            <option value="Decoloración + Color Fantasía">Color Fantasía</option>
-            <option value="Corrección de Color">Corrección de Color</option>
+            <option value="Mechas">Mechas</option>
+            <option value="Tinte">Tinte</option>
           </select>
-
-          <label style={{fontWeight: 'bold'}}>Cuéntame de tu cabello:</label>
-          <textarea 
-            value={detalles} 
-            onChange={(e) => setDetalles(e.target.value)} 
-            required
-            placeholder="Ej: Lo tengo negro por los hombros, nunca me he pintado o tengo tinte viejo..." 
-            style={{ padding: '12px', borderRadius: '10px', border: '1px solid #ddd', height: '120px', resize: 'none' }}
-          />
-
-          <button type="submit" style={{ 
-            padding: '15px', 
-            backgroundColor: '#ff85a2', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '30px', 
-            fontWeight: 'bold', 
-            fontSize: '16px',
-            cursor: 'pointer',
-            boxShadow: '0 4px 10px rgba(255, 133, 162, 0.3)'
-          }}>
-            Pedir Presupuesto a Martha 📱
-          </button>
+          <textarea value={detalles} onChange={(e) => setDetalles(e.target.value)} required placeholder="Detalles de tu cabello..." style={{...inputStyle, height: '100px'}} />
+          <button type="submit" style={btnStyle}>Pedir Presupuesto 📱</button>
         </form>
       </div>
     </div>
   );
 }
+
+const inputStyle = { padding: '12px', borderRadius: '10px', border: '1px solid #ddd', width: '100%', marginBottom: '5px' };
+const btnStyle = { padding: '12px', backgroundColor: '#ff85a2', color: 'white', border: 'none', borderRadius: '25px', fontWeight: 'bold', cursor: 'pointer', flex: 1 };

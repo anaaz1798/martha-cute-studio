@@ -6,7 +6,9 @@ export default function App() {
   const [sesion, setSesion] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [cargando, setCargando] = useState(false);
   const [citas, setCitas] = useState([]);
+  
   const [nombre, setNombre] = useState('');
   const [catSeleccionada, setCatSeleccionada] = useState(null);
   const [subCatSeleccionada, setSubCatSeleccionada] = useState('');
@@ -22,19 +24,10 @@ export default function App() {
   ];
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSesion(session);
-      if (session?.user.email === CORREO_ADMIN) cargarCitas();
-    };
-    checkUser();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSesion(session);
       if (session?.user.email === CORREO_ADMIN) cargarCitas();
     });
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const cargarCitas = async () => {
@@ -44,11 +37,19 @@ export default function App() {
 
   const handleAuth = async (e) => {
     e.preventDefault();
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert("Error: " + error.message);
-    if (data?.session) {
-      // ESTO ES LO QUE IMPORTA: Forzar recarga total
-      window.location.href = window.location.origin;
+    setCargando(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        alert("Error: " + error.message);
+        setCargando(false);
+      } else if (data.session) {
+        // Redirección forzada para que no se quede pegado
+        window.location.href = window.location.origin;
+      }
+    } catch (err) {
+      setCargando(false);
+      alert("Hubo un problema al entrar.");
     }
   };
 
@@ -60,7 +61,9 @@ export default function App() {
           <form onSubmit={handleAuth}>
             <input type="email" placeholder="Correo" value={email} onChange={(e)=>setEmail(e.target.value)} className="input-luxury" required />
             <input type="password" placeholder="Contraseña" value={password} onChange={(e)=>setPassword(e.target.value)} className="input-luxury" required />
-            <button type="submit" className="btn-luxury">Entrar</button>
+            <button type="submit" className="btn-luxury" disabled={cargando}>
+              {cargando ? "Entrando..." : "Entrar"}
+            </button>
           </form>
         </div>
       </div>

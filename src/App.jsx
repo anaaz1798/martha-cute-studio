@@ -9,33 +9,33 @@ export default function App() {
   const [citas, setCitas] = useState([]);
   
   const [nombre, setNombre] = useState('');
-  const [tecnica, setTecnica] = useState('Balayage');
+  const [catSeleccionada, setCatSeleccionada] = useState(null);
+  const [subCatSeleccionada, setSubCatSeleccionada] = useState('');
   const [detalles, setDetalles] = useState('');
 
-  // AQUÍ ESTÁ TU LLAVE MAESTRA
   const CORREO_ADMIN = "ana.az1798@gmail.com"; 
 
+  const menuStudio = [
+    { id: 'cabello', nombre: 'Cabello', icono: '💇‍♀️', color: '#ffafcc', opciones: ['Balayage', 'Corte', 'Secado', 'Keratina'] },
+    { id: 'unas', nombre: 'Uñas', icono: '💅', color: '#bde0fe', opciones: ['Sistemas', 'Gel / Semi', 'Pedicura', 'Manicura'] },
+    { id: 'cejas', nombre: 'Cejas & Pestañas', icono: '👁️', color: '#cdb4db', opciones: ['Lifting', 'Henna', 'Pestañas Punto', 'Depilación'] },
+    { id: 'maquillaje', nombre: 'Maquillaje', icono: '💄', color: '#a2d2ff', opciones: ['Social', 'Novias', 'Noche', 'Clases'] }
+  ];
+
   useEffect(() => {
-    // 1. Revisar sesión al cargar
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSesion(session);
       if (session?.user.email === CORREO_ADMIN) cargarCitas();
     });
-
-    // 2. Escuchar cambios de login/logout en tiempo real
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSesion(session);
       if (session?.user.email === CORREO_ADMIN) cargarCitas();
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
   const cargarCitas = async () => {
-    const { data } = await supabase
-      .from('citas')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data } = await supabase.from('citas').select('*').order('created_at', { ascending: false });
     setCitas(data || []);
   };
 
@@ -43,35 +43,25 @@ export default function App() {
     const { data, error } = tipo === 'login' 
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password });
-    
-    if (error) {
-      alert(error.message);
-    } else if (data.session) {
-      // Forzamos recarga para limpiar cualquier rastro de caché
-      window.location.reload();
-    }
+    if (error) alert(error.message);
+    else if (data.session) window.location.reload();
   };
 
-  const handleCerrarSesion = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
-
-  const handleSubmitPresupuesto = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const servicioFinal = `${catSeleccionada.nombre}: ${subCatSeleccionada}`;
     const { error } = await supabase.from('citas').insert([{ 
-      nombre, servicio: 'Presupuesto de Color: ' + tecnica, fecha: detalles 
+      nombre, servicio: servicioFinal, fecha: detalles 
     }]);
     if (error) alert(error.message);
     else {
-      const mensaje = `¡Hola Martha! ✨ Soy ${nombre}. Necesito presupuesto para ${tecnica}: ${detalles}`;
+      const mensaje = `¡Hola Martha! ✨ Soy ${nombre}. Quiero cita para ${servicioFinal}. ${detalles}`;
       window.open(`https://wa.me/584121663968?text=${encodeURIComponent(mensaje)}`, '_blank');
-      alert("¡Enviado! 💅");
-      setNombre(''); setDetalles('');
+      alert("¡Solicitud enviada! 💅");
+      setCatSeleccionada(null); setNombre(''); setDetalles('');
     }
   };
 
-  // --- VISTA 1: LOGIN (Si no hay nadie conectado) ---
   if (!sesion) {
     return (
       <div className="iphone-container">
@@ -86,45 +76,54 @@ export default function App() {
     );
   }
 
-  // --- VISTA 2: PANEL ADMINISTRADOR (Solo para ti) ---
   if (sesion.user.email === CORREO_ADMIN) {
     return (
       <div className="iphone-container">
         <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: '20px'}}>
-          <h1 className="greeting" style={{fontSize: '20px', margin: 0}}>Panel Jefa 👑</h1>
-          <button onClick={handleCerrarSesion} style={{width:'auto', padding:'8px 15px', borderRadius:'10px', backgroundColor:'#ff4d4d', color:'white', border:'none'}}>Salir</button>
+          <h1 className="greeting" style={{fontSize: '20px'}}>Panel Jefa 👑</h1>
+          <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="btn-outline" style={{width:'auto', padding:'5px 10px'}}>Salir</button>
         </div>
         <div className="lista-citas">
-          {citas.length > 0 ? citas.map((cita) => (
-            <div key={cita.id} className="glass-card" style={{marginBottom:'15px', padding:'15px', textAlign:'left'}}>
-              <p style={{margin: '5px 0'}}><strong>👤 Cliente:</strong> {cita.nombre}</p>
-              <p style={{margin: '5px 0'}}><strong>🎨 Técnica:</strong> {cita.servicio}</p>
-              <p style={{margin: '5px 0'}}><strong>📝 Pelo:</strong> {cita.fecha}</p>
-              <button onClick={() => window.open(`https://wa.me/584121663968`, '_blank')} style={{backgroundColor:'#25d366', color:'white', padding:'8px', marginTop:'10px', width:'100%', border:'none', borderRadius:'8px'}}>WhatsApp</button>
+          {citas.map((cita) => (
+            <div key={cita.id} className="glass-card" style={{marginBottom:'10px', textAlign:'left'}}>
+              <p><strong>👤 {cita.nombre}</strong></p>
+              <p>✨ {cita.servicio}</p>
+              <button onClick={() => window.open(`https://wa.me/584121663968`, '_blank')} className="btn-wa">WhatsApp</button>
             </div>
-          )) : <p style={{color:'white', textAlign:'center'}}>No hay presupuestos todavía.</p>}
+          ))}
         </div>
       </div>
     );
   }
 
-  // --- VISTA 3: CLIENTAS (Para cualquier otro usuario) ---
   return (
     <div className="iphone-container">
-      <div style={{textAlign: 'right'}}><button onClick={handleCerrarSesion} style={{width:'auto', padding:'5px', background:'none', border:'1px solid white', color:'white', borderRadius:'5px'}}>Cerrar Sesión</button></div>
-      <h1 className="greeting">Presupuesto de Color</h1>
-      <div className="glass-card">
-        <form onSubmit={handleSubmitPresupuesto}>
-          <input type="text" value={nombre} onChange={(e)=>setNombre(e.target.value)} placeholder="Tu nombre" required className="input-luxury"/>
-          <select value={tecnica} onChange={(e)=>setTecnica(e.target.value)} className="input-luxury">
-            <option value="Balayage">Balayage</option>
-            <option value="Mechas">Mechas</option>
-            <option value="Tinte">Tinte</option>
-          </select>
-          <textarea value={detalles} onChange={(e)=>setDetalles(e.target.value)} placeholder="Detalles de tu cabello..." className="input-luxury" style={{height:'100px'}} />
-          <button type="submit" className="btn-luxury">Pedir Presupuesto 📱</button>
-        </form>
-      </div>
+      <div style={{textAlign: 'right'}}><button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="btn-logout-mini">Cerrar Sesión</button></div>
+      <h1 className="greeting">¿Qué nos hacemos hoy?</h1>
+      
+      {!catSeleccionada ? (
+        <div className="category-grid">
+          {menuStudio.map((cat) => (
+            <div key={cat.id} className="category-card" onClick={() => { setCatSeleccionada(cat); setSubCatSeleccionada(cat.opciones[0]); }} style={{ backgroundColor: cat.color }}>
+              <span style={{fontSize: '40px'}}>{cat.icono}</span>
+              <h3 style={{color: '#444', marginTop: '10px'}}>{cat.nombre}</h3>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="glass-card animate-fade">
+          <button onClick={() => setCatSeleccionada(null)} className="btn-back">⬅ Volver</button>
+          <h2 style={{color: 'white', marginBottom: '15px'}}>{catSeleccionada.icono} {catSeleccionada.nombre}</h2>
+          <form onSubmit={handleSubmit}>
+            <input type="text" value={nombre} onChange={(e)=>setNombre(e.target.value)} placeholder="Tu nombre" required className="input-luxury"/>
+            <select value={subCatSeleccionada} onChange={(e)=>setSubCatSeleccionada(e.target.value)} className="input-luxury">
+              {catSeleccionada.opciones.map(sub => <option key={sub} value={sub}>{sub}</option>)}
+            </select>
+            <textarea value={detalles} onChange={(e)=>setDetalles(e.target.value)} placeholder="Detalles adicionales..." className="input-luxury" />
+            <button type="submit" className="btn-luxury">Solicitar Cita 📱</button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

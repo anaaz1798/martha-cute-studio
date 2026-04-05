@@ -38,18 +38,16 @@ export default function App() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setCargando(true);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        alert("Error: " + error.message);
-        setCargando(false);
-      } else if (data.session) {
-        // Redirección forzada para que no se quede pegado
-        window.location.href = window.location.origin;
-      }
-    } catch (err) {
+    console.log("Intentando entrar con:", email);
+    
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) {
+      alert("¡ERROR DE SUPABASE!: " + error.message);
       setCargando(false);
-      alert("Hubo un problema al entrar.");
+    } else if (data.session) {
+      alert("¡Login exitoso! Entrando...");
+      window.location.reload();
     }
   };
 
@@ -62,7 +60,7 @@ export default function App() {
             <input type="email" placeholder="Correo" value={email} onChange={(e)=>setEmail(e.target.value)} className="input-luxury" required />
             <input type="password" placeholder="Contraseña" value={password} onChange={(e)=>setPassword(e.target.value)} className="input-luxury" required />
             <button type="submit" className="btn-luxury" disabled={cargando}>
-              {cargando ? "Entrando..." : "Entrar"}
+              {cargando ? "Cargando..." : "Entrar"}
             </button>
           </form>
         </div>

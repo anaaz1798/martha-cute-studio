@@ -19,27 +19,41 @@ export default function App() {
     check();
   }, []);
 
-  if (loading) return <div style={{color:'magenta', textAlign:'center', marginTop:'50px'}}>Cargando...</div>;
+  if (loading) return <div style={{color:'magenta', textAlign:'center', marginTop:'50px'}}>Cargando Martha Cute Studio... ✨</div>;
 
   if (!user) {
     return (
-      <div style={{textAlign:'center', marginTop:'100px'}}>
-        <h1>Martha Cute Studio ✨</h1>
-        <button onClick={async () => {
-          const email = prompt("Tu correo:");
-          const password = prompt("Tu clave:");
-          await supabase.auth.signInWithPassword({ email, password });
-          window.location.reload();
-        }} style={{padding:'10px 20px', borderRadius:'10px', background:'pink'}}>Entrar</button>
+      <div style={{textAlign:'center', marginTop:'100px', fontFamily:'sans-serif'}}>
+        <h1 style={{color: '#ad1457'}}>Martha Cute Studio ✨</h1>
+        <div style={{background:'pink', padding:'20px', borderRadius:'15px', display:'inline-block'}}>
+            <p>Por favor, entra para continuar</p>
+            <button onClick={async () => {
+              const email = prompt("Tu correo:");
+              const password = prompt("Tu clave:");
+              const { error } = await supabase.auth.signInWithPassword({ email, password });
+              if (error) alert("Error: " + error.message);
+              else window.location.reload();
+            }} style={{padding:'10px 20px', borderRadius:'10px', border:'none', cursor:'pointer', background:'white', fontWeight:'bold'}}>
+              ENTRAR
+            </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{padding:'20px', textAlign:'center', backgroundColor: rol === 'admin' ? '#fce4ec' : 'white'}}>
-      <h1>{rol === 'admin' ? "¡Hola Jefa Ana! 👑" : "¡Hola Clienta! ✨"}</h1>
-      <p>Tu rol es: <b>{rol}</b></p>
-      <button onClick={() => supabase.auth.signOut().then(()=>window.location.reload())}>Salir</button>
+    <div style={{padding:'20px', textAlign:'center', fontFamily:'sans-serif', backgroundColor: '#fce4ec', minHeight:'100vh'}}>
+      <h1 style={{color: '#880e4f'}}>{rol === 'admin' ? "¡Hola Jefa Ana! 👑" : "¡Bienvenida! ✨"}</h1>
+      <div style={{background:'white', padding:'30px', borderRadius:'20px', boxShadow:'0 4px 10px rgba(0,0,0,0.1)', display:'inline-block'}}>
+        <p>Tu rol detectado es: <b style={{fontSize:'20px', color: '#ad1457'}}>{rol}</b></p>
+        <hr/>
+        {rol === 'admin' ? (
+            <p>✅ Tienes acceso total al panel.</p>
+        ) : (
+            <p>Estás en modo cliente.</p>
+        )}
+        <button onClick={() => supabase.auth.signOut().then(()=>window.location.reload())} style={{marginTop:'20px', color:'red', border:'none', background:'none', cursor:'pointer'}}>Cerrar Sesión</button>
+      </div>
     </div>
   );
 }

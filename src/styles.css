@@ -1,96 +1,78 @@
-/* Dashboard Admin */
-.admin-dashboard {
-  padding: 20px;
-  background-color: #fce4ec;
-  min-height: 100vh;
-  font-family: 'Segoe UI', sans-serif;
-}
-
-.admin-banner {
-  background: linear-gradient(90deg, #ffc1e3, #e1bee7);
-  padding: 30px;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-}
-
-.banner-content {
+/* 1. Fondo Principal: Tu imagen personalizada */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  
+  /* REEMPLAZA '/fondo.jpg' CON EL NOMBRE Y FORMATO REAL DE TU IMAGEN */
+  background-image: url('/fondo.jpg'); 
+  
+  background-size: cover; /* La imagen cubre toda la pantalla */
+  background-position: center; /* Centrada */
+  background-attachment: fixed; /* No se mueve al hacer scroll */
+  
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center;
+  alignItems: center;
+  minHeight: 100vh;
 }
 
-.banner-text h1 { color: #880e4f; margin: 0; }
-.banner-text h3 { color: #ad1457; margin-top: 10px; font-weight: normal; }
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.dash-card {
-  background: white;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.icon-bg {
-  font-size: 24px;
-  background: #f8bbd0;
-  padding: 10px;
-  border-radius: 12px;
-}
-
-.dash-table {
+/* 2. El Contenedor Principal (Para que la tarjeta flote) */
+#root {
   width: 100%;
-  border-collapse: collapse;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.dash-table th { text-align: left; color: #880e4f; padding: 10px; }
-.dash-table td { padding: 10px; border-top: 1px solid #fce4ec; }
-
-.status-pill {
-  background: #c8e6c9;
-  color: #2e7d32;
-  padding: 4px 8px;
+/* 3. La Tarjeta Blanca (Estilo Bolt) */
+.glass-card {
+  background: rgba(255, 255, 255, 1); /* Blanco Puro */
+  padding: 40px;
   border-radius: 20px;
-  font-size: 12px;
-}
-
-/* Notificación Flotante */
-.notif-toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  border-left: 5px solid #ad1457;
-}
-
-/* Categorías para Clientas */
-.category-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.category-card {
-  padding: 25px;
-  border-radius: 20px;
+  width: 90%;
+  max-width: 360px; /* Tamaño perfecto para móvil */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Sombra suave para dar relieve */
   text-align: center;
-  cursor: pointer;
-  transition: 0.3s;
 }
 
-.cat-icon { font-size: 40px; display: block; margin-bottom: 10px; }
+/* 4. Estilos para los textos e inputs (Como en la foto) */
+.glass-card h1 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.input-luxury {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd; /* Borde gris suave */
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box; /* Para que el padding no agrande el input */
+}
+
+/* 5. El Botón Rosa (Estilo "TheCute") */
+.btn-luxury {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background-color: #d15690; /* Rosa de tu foto */
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-luxury:hover {
+  background-color: #ad1457; /* Un rosa más oscuro al pasar el mouse */
+}
+
+/* 6. Link de 'Regístrate' */
+.switch-text {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #880e4f; /* Rosa oscuro */
+}

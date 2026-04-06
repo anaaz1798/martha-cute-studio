@@ -1,78 +1,108 @@
-/* 1. Fondo Principal: Tu imagen personalizada */
-body {
-  margin: 0;
-  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  
-  /* REEMPLAZA '/fondo.jpg' CON EL NOMBRE Y FORMATO REAL DE TU IMAGEN */
-  background-image: url('/fondo.jpg'); 
-  
-  background-size: cover; /* La imagen cubre toda la pantalla */
-  background-position: center; /* Centrada */
-  background-attachment: fixed; /* No se mueve al hacer scroll */
-  
-  display: flex;
-  justify-content: center;
-  alignItems: center;
-  minHeight: 100vh;
-}
-
-/* 2. El Contenedor Principal (Para que la tarjeta flote) */
-#root {
-  width: 100%;
+/* Contenedor que ocupa toda la pantalla con tu imagen */
+.login-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* CAMBIA '/fondo.jpg' por el nombre de tu imagen en la carpeta public */
+  background: url('/fondo.jpg') no-repeat center center fixed;
+  background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: 'Inter', sans-serif;
 }
 
-/* 3. La Tarjeta Blanca (Estilo Bolt) */
+/* La tarjeta blanca */
 .glass-card {
-  background: rgba(255, 255, 255, 1); /* Blanco Puro */
-  padding: 40px;
-  border-radius: 20px;
-  width: 90%;
-  max-width: 360px; /* Tamaño perfecto para móvil */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Sombra suave para dar relieve */
+  background: white;
+  padding: 40px 30px;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   text-align: center;
 }
 
-/* 4. Estilos para los textos e inputs (Como en la foto) */
-.glass-card h1 {
-  color: #333;
-  font-weight: 600;
+/* El círculo del icono */
+.icon-container {
+  width: 60px;
+  height: 60px;
+  background-color: #d15690;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px;
+}
+
+.sparkle-icon {
+  color: white;
+  font-size: 24px;
+}
+
+.brand-title {
+  font-size: 28px;
+  margin: 0;
+  color: #111;
+  font-weight: 700;
+}
+
+.brand-subtitle {
+  color: #666;
+  margin-top: 5px;
   margin-bottom: 30px;
 }
 
-.input-luxury {
-  width: 100%;
-  padding: 15px;
+/* Estilo de los inputs */
+.login-form {
+  text-align: left;
+}
+
+.input-group {
   margin-bottom: 20px;
-  border: 1px solid #ddd; /* Borde gris suave */
-  border-radius: 8px;
-  font-size: 16px;
-  box-sizing: border-box; /* Para que el padding no agrande el input */
 }
 
-/* 5. El Botón Rosa (Estilo "TheCute") */
-.btn-luxury {
-  width: 100%;
-  padding: 15px;
-  border: none;
-  border-radius: 8px;
-  background-color: #d15690; /* Rosa de tu foto */
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.btn-luxury:hover {
-  background-color: #ad1457; /* Un rosa más oscuro al pasar el mouse */
-}
-
-/* 6. Link de 'Regístrate' */
-.switch-text {
-  margin-top: 20px;
+.input-group label {
+  display: block;
   font-size: 14px;
-  color: #880e4f; /* Rosa oscuro */
+  margin-bottom: 8px;
+  color: #444;
+  font-weight: 500;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* El botón rosa idéntico a la foto */
+.btn-pink {
+  width: 100%;
+  padding: 14px;
+  background-color: #d15690;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.footer-text {
+  margin-top: 25px;
+  font-size: 14px;
+  color: #666;
+}
+
+.link-pink {
+  color: #d15690;
+  font-weight: 600;
+  cursor: pointer;
 }

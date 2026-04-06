@@ -8,34 +8,37 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) alert("Error: " + error.message);
-    else window.location.reload();
+    if (error) {
+      alert("Error: " + error.message);
+    } else {
+      window.location.reload();
+    }
   };
 
   return (
-    <div className="login-screen">
-      <div className="glass-card">
-        {/* El Icono Rosa de arriba */}
-        <div className="icon-container">
-          <span className="sparkle-icon">✨</span>
+    <div className="bolt-screen">
+      <div className="bolt-card">
+        {/* Círculo rosa con icono de Bolt */}
+        <div className="bolt-icon-circle">
+          <span className="bolt-sparkle">✨</span>
         </div>
         
-        <h1 className="brand-title">TheCute</h1>
-        <p className="brand-subtitle">Bienvenida de vuelta</p>
+        <h1 className="bolt-title">TheCute</h1>
+        <p className="bolt-welcome">Bienvenida de vuelta</p>
 
-        <form onSubmit={handleLogin} className="login-form">
-          <div className="input-group">
+        <form onSubmit={handleLogin} className="bolt-form">
+          <div className="bolt-input-group">
             <label>Email</label>
             <input 
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@correo.com" 
+              placeholder="Escribe tu correo" 
               required 
             />
           </div>
 
-          <div className="input-group">
+          <div className="bolt-input-group">
             <label>Contraseña</label>
             <input 
               type="password" 
@@ -46,11 +49,11 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="btn-pink">Ingresar</button>
+          <button type="submit" className="bolt-btn">Ingresar</button>
         </form>
 
-        <p className="footer-text">
-          ¿No tienes cuenta? <span className="link-pink">Regístrate</span>
+        <p className="bolt-footer">
+          ¿No tienes cuenta? <span className="bolt-link">Regístrate</span>
         </p>
       </div>
     </div>

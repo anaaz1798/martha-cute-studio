@@ -2,13 +2,25 @@ import { useState } from 'react';
 
 const MENU_SERVICIOS = [
   {
+    categoria: 'Cabello',
+    icon: '💇‍♀️',
+    items: [
+      { id: 10, nombre: 'Corte Dama', precio: 35, tiempo: '1h' },
+      { id: 11, nombre: 'Secado + Plancha', precio: 25, tiempo: '45min' },
+      { 
+        id: 12, 
+        nombre: 'Presupuesto de color', 
+        isWhatsApp: true, 
+        link: 'https://wa.link/nkdmm8' 
+      }
+    ]
+  },
+  {
     categoria: 'Pestañas',
     icon: '👁️',
     items: [
       { id: 1, nombre: 'Clásicas', precio: 50, tiempo: '1h 30min' },
-      { id: 2, nombre: 'Volumen Ruso', precio: 80, tiempo: '2h 15min' },
-      { id: 3, nombre: 'Híbridas', precio: 65, tiempo: '2h' },
-      { id: 4, nombre: 'Lifting + Tinte', precio: 45, tiempo: '1h' }
+      { id: 2, nombre: 'Volumen Ruso', precio: 80, tiempo: '2h 15min' }
     ]
   },
   {
@@ -16,16 +28,7 @@ const MENU_SERVICIOS = [
     icon: '✨',
     items: [
       { id: 5, nombre: 'Diseño + Depilación', precio: 20, tiempo: '30min' },
-      { id: 6, nombre: 'Laminado de Cejas', precio: 55, tiempo: '1h' },
-      { id: 7, nombre: 'Pigmentación Henna', precio: 30, tiempo: '45min' }
-    ]
-  },
-  {
-    categoria: 'Faciales',
-    icon: '🧼',
-    items: [
-      { id: 8, nombre: 'Limpieza Profunda', precio: 60, tiempo: '1h 15min' },
-      { id: 9, nombre: 'Hidratación VIP', precio: 40, tiempo: '45min' }
+      { id: 6, nombre: 'Laminado de Cejas', precio: 55, tiempo: '1h' }
     ]
   }
 ];
@@ -33,11 +36,18 @@ const MENU_SERVICIOS = [
 export default function ServicesPage() {
   const [seleccionado, setSeleccionado] = useState(null);
 
+  const handleAction = (item) => {
+    if (item.isWhatsApp) {
+      window.open(item.link, '_blank');
+    } else {
+      setSeleccionado(item);
+    }
+  };
+
   return (
     <div style={{ maxWidth: '450px', margin: 'auto', padding: '20px', fontFamily: 'sans-serif' }}>
       <h1 style={{ textAlign: 'center', color: '#111', fontSize: '24px' }}>Nuestros Servicios</h1>
-      <p style={{ textAlign: 'center', color: '#666', marginBottom: '30px' }}>Selecciona lo que deseas agendar</p>
-
+      
       {MENU_SERVICIOS.map((cat) => (
         <div key={cat.categoria} style={{ marginBottom: '25px' }}>
           <h2 style={{ fontSize: '18px', color: '#d15690', borderBottom: '1px solid #eee', paddingBottom: '8px', marginBottom: '15px' }}>
@@ -47,7 +57,7 @@ export default function ServicesPage() {
           {cat.items.map((s) => (
             <div 
               key={s.id} 
-              onClick={() => setSeleccionado(s)}
+              onClick={() => handleAction(s)}
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -55,16 +65,18 @@ export default function ServicesPage() {
                 borderRadius: '12px',
                 marginBottom: '8px',
                 cursor: 'pointer',
-                transition: '0.2s',
                 backgroundColor: seleccionado?.id === s.id ? '#fff0f6' : '#fff',
-                border: seleccionado?.id === s.id ? '2px solid #d15690' : '1px solid #f0f0f0'
+                border: s.isWhatsApp ? '2px solid #25D366' : (seleccionado?.id === s.id ? '2px solid #d15690' : '1px solid #f0f0f0')
               }}
             >
               <div>
                 <div style={{ fontWeight: '600', color: '#333' }}>{s.nombre}</div>
-                <div style={{ fontSize: '12px', color: '#999' }}>{s.tiempo}</div>
+                {s.tiempo && <div style={{ fontSize: '12px', color: '#999' }}>{s.tiempo}</div>}
+                {s.isWhatsApp && <div style={{ fontSize: '12px', color: '#25D366', fontWeight: 'bold' }}>Pedir presupuesto</div>}
               </div>
-              <div style={{ fontWeight: 'bold', color: '#d15690' }}>${s.precio}</div>
+              <div style={{ fontWeight: 'bold', color: s.isWhatsApp ? '#25D366' : '#d15690' }}>
+                {s.isWhatsApp ? '📲' : `$${s.precio}`}
+              </div>
             </div>
           ))}
         </div>

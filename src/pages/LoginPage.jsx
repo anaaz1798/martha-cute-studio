@@ -8,17 +8,13 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      alert("Error: " + error.message);
-    } else {
-      window.location.reload();
-    }
+    if (error) alert("Error: " + error.message);
+    else window.location.reload();
   };
 
   return (
     <div className="bolt-screen">
       <div className="bolt-card">
-        {/* Círculo rosa con icono de Bolt */}
         <div className="bolt-icon-circle">
           <span className="bolt-sparkle">✨</span>
         </div>
@@ -33,7 +29,7 @@ export default function LoginPage() {
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Escribe tu correo" 
+              placeholder="tu@correo.com" 
               required 
             />
           </div>

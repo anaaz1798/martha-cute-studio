@@ -1,108 +1,95 @@
-/* Contenedor que ocupa toda la pantalla con tu imagen */
-.login-screen {
+/* Contenedor total con fondo negro */
+.bolt-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  /* CAMBIA '/fondo.jpg' por el nombre de tu imagen en la carpeta public */
-  background: url('/fondo.jpg') no-repeat center center fixed;
-  background-size: cover;
+  background-color: #000000; /* Negro total mientras tanto */
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* La tarjeta blanca */
-.glass-card {
+/* La tarjeta blanca (Estilo Bolt) */
+.bolt-card {
   background: white;
-  padding: 40px 30px;
-  border-radius: 24px;
+  padding: 40px 32px;
+  border-radius: 28px; /* Bordes bien redondos como en la foto de Bolt */
   width: 100%;
   max-width: 380px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.05); /* Sombra muy sutil por el fondo negro */
   text-align: center;
 }
 
-/* El círculo del icono */
-.icon-container {
-  width: 60px;
-  height: 60px;
-  background-color: #d15690;
+/* El círculo rosa del icono */
+.bolt-icon-circle {
+  width: 64px;
+  height: 64px;
+  background: #d15690; /* El rosa de TheCute */
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 20px;
+  margin: 0 auto 24px;
 }
 
-.sparkle-icon {
+.bolt-sparkle {
   color: white;
-  font-size: 24px;
-}
-
-.brand-title {
   font-size: 28px;
+}
+
+.bolt-title {
+  font-size: 32px;
+  font-weight: 800;
   margin: 0;
-  color: #111;
-  font-weight: 700;
+  color: #1a1a1a;
 }
 
-.brand-subtitle {
+.bolt-welcome {
   color: #666;
-  margin-top: 5px;
-  margin-bottom: 30px;
+  margin-top: 8px;
+  margin-bottom: 32px;
 }
 
-/* Estilo de los inputs */
-.login-form {
-  text-align: left;
-}
+/* Formulario e Inputs */
+.bolt-form { text-align: left; }
 
-.input-group {
-  margin-bottom: 20px;
-}
+.bolt-input-group { margin-bottom: 20px; }
 
-.input-group label {
+.bolt-input-group label {
   display: block;
   font-size: 14px;
-  margin-bottom: 8px;
+  font-weight: 600;
   color: #444;
-  font-weight: 500;
+  margin-bottom: 8px;
 }
 
-.input-group input {
+.bolt-input-group input {
   width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #ddd;
+  padding: 14px 16px;
+  border: 1.5px solid #eee;
   border-radius: 12px;
   font-size: 16px;
   box-sizing: border-box;
+  background: #fcfcfc;
 }
 
-/* El botón rosa idéntico a la foto */
-.btn-pink {
+/* El botón rosa potente */
+.bolt-btn {
   width: 100%;
-  padding: 14px;
-  background-color: #d15690;
+  padding: 16px;
+  background: #d15690;
   color: white;
   border: none;
   border-radius: 12px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
-.footer-text {
-  margin-top: 25px;
-  font-size: 14px;
-  color: #666;
-}
+.bolt-footer { margin-top: 24px; font-size: 14px; color: #666; }
 
-.link-pink {
-  color: #d15690;
-  font-weight: 600;
-  cursor: pointer;
-}
+.bolt-link { color: #d15690; font-weight: 700; cursor: pointer; }

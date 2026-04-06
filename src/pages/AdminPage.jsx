@@ -1,31 +1,21 @@
-
-import { useEffect, useState } from 'react';
-import { supabase } from '../supabase';
+import { useState } from 'react';
 
 export default function AdminPage() {
-  const [citas, setCitas] = useState([]);
-
-  useEffect(() => {
-    const cargarCitas = async () => {
-      const { data } = await supabase.from('citas').select('*').order('created_at', { ascending: false });
-      setCitas(data || []);
-    };
-    cargarCitas();
-  }, []);
+  const [activeTab, setActiveTab] = useState('branding');
 
   return (
-    <div className="admin-dashboard" style={{backgroundColor: '#fce4ec', minHeight: '100vh', padding: '20px'}}>
-      <div className="admin-banner" style={{background: 'linear-gradient(90deg, #ffc1e3, #e1bee7)', padding: '20px', borderRadius: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        <h2 style={{margin:0, color: '#880e4f'}}>Panel Jefa 👑</h2>
-        <button onClick={() => supabase.auth.signOut().then(() => window.location.reload())} className="btn-logout-mini">Salir</button>
-      </div>
-      <div className="dash-card" style={{background: 'white', padding: '20px', borderRadius: '15px'}}>
-        <h3>📬 Citas Recibidas</h3>
-        {citas.map(c => (
-          <div key={c.id} style={{padding: '10px 0', borderBottom: '1px solid #eee'}}>
-            <strong>{c.nombre}</strong> - {c.servicio}
-          </div>
-        ))}
+    <div className="bolt-screen" style={{ flexDirection: 'column', padding: '20px' }}>
+      <div className="bolt-card" style={{ maxWidth: '800px', width: '100%' }}>
+        <h1 className="bolt-title">Panel de Administración</h1>
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', margin: '20px 0' }}>
+          <button onClick={() => setActiveTab('branding')} className="bolt-btn" style={{ width: 'auto', padding: '10px 20px' }}>Branding</button>
+          <button onClick={() => setActiveTab('servicios')} className="bolt-btn" style={{ width: 'auto', padding: '10px 20px' }}>Servicios</button>
+          <button onClick={() => setActiveTab('citas')} className="bolt-btn" style={{ width: 'auto', padding: '10px 20px' }}>Citas</button>
+        </div>
+        <div style={{ padding: '20px', border: '1px solid #eee', borderRadius: '12px' }}>
+          <p>Gestionando: <strong>{activeTab.toUpperCase()}</strong></p>
+          <p style={{ color: '#666' }}>Aquí aparecerán las opciones para editar tu estudio.</p>
+        </div>
       </div>
     </div>
   );

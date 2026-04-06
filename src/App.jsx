@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './supabase';
-import LoginPage from './pages/LoginPage';
-import HomePage from './pages/HomePage';
-import AdminPage from './pages/AdminPage';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -10,44 +7,39 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Chequear sesión al cargar
-    const checkUser = async () => {
+    const check = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setUser(session.user);
-        // Buscar el rol en tu tabla de perfiles
-        const { data } = await supabase
-          .from('perfiles')
-          .select('rol')
-          .eq('id', session.user.id)
-          .single();
-        setRol(data?.rol || 'cliente');
-      }
-      setLoading(false);
-    };
-
-    checkUser();
-
-    // 2. Escuchar cambios de sesión (Login/Logout)
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session) {
         setUser(session.user);
         const { data } = await supabase.from('perfiles').select('rol').eq('id', session.user.id).single();
         setRol(data?.rol || 'cliente');
-      } else {
-        setUser(null);
-        setRol(null);
       }
-    });
-
-    return () => authListener.subscription.unsubscribe();
+      setLoading(false);
+    };
+    check();
   }, []);
 
-  if (loading) return <div style={{color: 'white', textAlign: 'center', marginTop: '50px'}}>Cargando Martha Cute Studio... ✨</div>;
+  if (loading) return <div style={{color:'magenta', textAlign:'center', marginTop:'50px'}}>Cargando...</div>;
 
-  // Si no hay usuario, directo al Login
-  if (!user) return <LoginPage />;
+  if (!user) {
+    return (
+      <div style={{textAlign:'center', marginTop:'100px'}}>
+        <h1>Martha Cute Studio ✨</h1>
+        <button onClick={async () => {
+          const email = prompt("Tu correo:");
+          const password = prompt("Tu clave:");
+          await supabase.auth.signInWithPassword({ email, password });
+          window.location.reload();
+        }} style={{padding:'10px 20px', borderRadius:'10px', background:'pink'}}>Entrar</button>
+      </div>
+    );
+  }
 
-  // Si eres admin, al Panel Jefa. Si no, al Home de clientes.
-  return rol === 'admin' ? <AdminPage /> : <HomePage />;
+  return (
+    <div style={{padding:'20px', textAlign:'center', backgroundColor: rol === 'admin' ? '#fce4ec' : 'white'}}>
+      <h1>{rol === 'admin' ? "¡Hola Jefa Ana! 👑" : "¡Hola Clienta! ✨"}</h1>
+      <p>Tu rol es: <b>{rol}</b></p>
+      <button onClick={() => supabase.auth.signOut().then(()=>window.location.reload())}>Salir</button>
+    </div>
+  );
 }

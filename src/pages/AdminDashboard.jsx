@@ -1,19 +1,39 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+import { sonarBrillitos } from '../utils/notifications'; // Importamos la magia ✨
 
 export default function AdminDashboard() {
-  const [tab, setTab] = useState('citas'); // 'citas', 'clientas', 'vitrina', 'config'
+  const [tab, setTab] = useState('citas'); 
   const [citas, setCitas] = useState([]);
   const [clientas, setClientas] = useState([]);
   const [productos, setProductos] = useState([]);
   const [config, setConfig] = useState({});
 
+  // ELEGANCIA: El "Oído" en tiempo real
   useEffect(() => {
     cargarDatos();
+
+    // Suscripción para que suenen los brillitos al entrar una cita nueva
+    const canalCitas = supabase
+      .channel('notificaciones-martha')
+      .on(
+        'postgres_changes', 
+        { event: 'INSERT', table: 'appointments' }, 
+        (payload) => {
+          sonarBrillitos(); // ✨ Sonido nativo
+          alert("¡Nueva cita agendada! Revisa la agenda ✨💖");
+          cargarDatos(); 
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(canalCitas);
+    };
   }, [tab]);
 
   async function cargarDatos() {
-    const { data: c } = await supabase.from('appointments').select('*, profiles(full_name, phone), services(name)').order('appointment_time');
+    const { data: c } = await supabase.from('appointments').select('*, profiles(full_name, phone), services(name)').order('appointment_time', { ascending: false });
     const { data: cl } = await supabase.from('profiles').select('*').eq('role', 'client');
     const { data: pr } = await supabase.from('products').select('*').order('created_at', { ascending: false });
     const { data: cfg } = await supabase.from('global_config').select('*').single();
@@ -42,7 +62,8 @@ export default function AdminDashboard() {
 
   return (
     <div style={adminPage}>
-      <h1 style={{ color: '#ff85a1', textAlign: 'center', fontFamily: 'serif' }}>Martha's Control ✨</h1>
+      <h1 style={{ color: '#ff85a1', textAlign: 'center', fontFamily: 'serif', marginBottom: '5px' }}>Martha's Control ✨</h1>
+      <p style={{ textAlign: 'center', fontSize: '12px', color: '#666', marginBottom: '20px' }}>Gestión de Salón y Equipo</p>
       
       {/* Menú de Navegación Admin */}
       <nav style={navStyle}>
@@ -59,9 +80,10 @@ export default function AdminDashboard() {
             <b>{cita.profiles?.full_name}</b>
             <span style={statusBadge(cita.status)}>{cita.status}</span>
           </div>
-          <p style={infoText}>{cita.services?.name} - {new Date(cita.appointment_time).toLocaleString()}</p>
+          <p style={infoText}>{cita.services?.name}</p>
+          <p style={infoText}>📅 {new Date(cita.appointment_time).toLocaleString()}</p>
           <button 
-            onClick={() => enviarRecordatorio(cita.profiles?.full_name, cita.profiles?.phone, 'mañana', '3:00 PM')}
+            onClick={() => enviarRecordatorio(cita.profiles?.full_name, cita.profiles?.phone, 'mañana', 'la hora agendada')}
             style={btnAction}
           >
             Enviar Recordatorio 📲
@@ -85,7 +107,7 @@ export default function AdminDashboard() {
       {/* SECCIÓN VITRINA */}
       {tab === 'vitrina' && productos.map(p => (
         <div key={p.id} style={{ ...cardStyle, display: 'flex', gap: '15px' }}>
-          <img src={p.image_url} style={{ width: '60px', height: '60px', borderRadius: '10px' }} alt="" />
+          <img src={p.image_url} style={{ width: '60px', height: '60px', borderRadius: '10px', objectFit: 'cover' }} alt="" />
           <div style={{ flex: 1 }}>
             <p style={{ margin: 0 }}><b>{p.name}</b></p>
             <p style={infoText}>${p.price}</p>
@@ -102,34 +124,39 @@ export default function AdminDashboard() {
       {/* SECCIÓN CONFIG (SOLO MARTHA) */}
       {tab === 'config' && (
         <div style={cardStyle}>
-          <h3>Ajustes del Salón</h3>
+          <h3>Ajustes del Salón 🩷</h3>
           <label style={labelStyle}>WhatsApp Master</label>
-          <input style={inputStyle} defaultValue={config.whatsapp_master} />
-          <label style={labelStyle}>Logo URL</label>
+          <input style={inputStyle} defaultValue={config.whatsapp_master} placeholder="Ej: 584241234567" />
+          <label style={labelStyle}>Link del Logo</label>
           <input style={inputStyle} defaultValue={config.logo_url} />
+          <label style={labelStyle}>Link del Banner</label>
+          <input style={inputStyle} defaultValue={config.banner_url} />
           <button style={btnSave}>Guardar Cambios</button>
+          <div style={{marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '10px'}}>
+             <p style={{fontSize: '11px', color: '#888'}}>ID de Sesión: {config.id}</p>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-// --- ESTILOS ---
-const adminPage = { minHeight: '100vh', backgroundColor: '#fafafa', padding: '20px', paddingBottom: '80px' };
-const navStyle = { display: 'flex', gap: '10px', marginBottom: '20px', overflowX: 'auto', padding: '5px' };
+// --- ESTILOS NATIVOS ---
+const adminPage = { minHeight: '100vh', backgroundColor: '#fff', padding: '20px', paddingBottom: '80px', fontFamily: 'sans-serif' };
+const navStyle = { display: 'flex', gap: '10px', marginBottom: '25px', overflowX: 'auto', paddingBottom: '10px' };
 const tabBtn = (active) => ({
-  padding: '10px 20px', borderRadius: '15px', border: 'none',
-  backgroundColor: active ? '#000' : '#fff', color: active ? '#ff85a1' : '#000',
-  fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+  padding: '12px 20px', borderRadius: '15px', border: 'none',
+  backgroundColor: active ? '#000' : '#f5f5f5', color: active ? '#ff85a1' : '#666',
+  fontWeight: 'bold', cursor: 'pointer', transition: '0.3s', minWidth: '100px'
 });
-const cardStyle = { backgroundColor: '#fff', padding: '15px', borderRadius: '20px', marginBottom: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' };
-const infoText = { fontSize: '13px', color: '#666', margin: '5px 0' };
-const btnAction = { width: '100%', padding: '10px', marginTop: '10px', backgroundColor: '#000', color: '#ff85a1', border: '1px solid #ff85a1', borderRadius: '10px', fontWeight: 'bold' };
-const btnWa = { backgroundColor: '#25D366', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '10px', fontSize: '12px' };
+const cardStyle = { backgroundColor: '#fff', padding: '18px', borderRadius: '22px', marginBottom: '15px', border: '1px solid #f0f0f0', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' };
+const infoText = { fontSize: '13px', color: '#666', margin: '4px 0' };
+const btnAction = { width: '100%', padding: '12px', marginTop: '12px', backgroundColor: '#000', color: '#ff85a1', border: '1px solid #ff85a1', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' };
+const btnWa = { backgroundColor: '#25D366', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' };
 const toggleBtn = (active) => ({
-  backgroundColor: active ? '#ff85a1' : '#ccc', color: '#fff', border: 'none', padding: '5px 15px', borderRadius: '15px', height: '30px'
+  backgroundColor: active ? '#ff85a1' : '#eee', color: active ? '#fff' : '#888', border: 'none', padding: '8px 15px', borderRadius: '15px', fontWeight: 'bold', cursor: 'pointer'
 });
-const statusBadge = (s) => ({ fontSize: '10px', padding: '3px 8px', borderRadius: '10px', backgroundColor: s === 'scheduled' ? '#e3f2fd' : '#f5f5f5' });
-const labelStyle = { display: 'block', fontSize: '12px', marginBottom: '5px', fontWeight: 'bold' };
-const inputStyle = { width: '100%', padding: '10px', marginBottom: '15px', borderRadius: '10px', border: '1px solid #eee' };
-const btnSave = { width: '100%', padding: '12px', backgroundColor: '#000', color: '#fff', border: 'none', borderRadius: '15px', fontWeight: 'bold' };
+const statusBadge = (s) => ({ fontSize: '10px', padding: '4px 10px', borderRadius: '12px', backgroundColor: s === 'scheduled' ? '#fff0f3' : '#f5f5f5', color: '#ff85a1', fontWeight: 'bold', textTransform: 'uppercase' });
+const labelStyle = { display: 'block', fontSize: '12px', marginBottom: '6px', fontWeight: 'bold', color: '#333' };
+const inputStyle = { width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '12px', border: '1px solid #eee', outline: 'none', boxSizing: 'border-box' };
+const btnSave = { width: '100%', padding: '15px', backgroundColor: '#000', color: '#ff85a1', border: 'none', borderRadius: '15px', fontWeight: 'bold', fontSize: '15px', cursor: 'pointer' };

@@ -1,81 +1,59 @@
-/* Configuración del fondo negro */
-body, html {
-  margin: 0;
-  padding: 0;
+/* Estilo General */
+.booking-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: sans-serif;
+}
+
+/* LA MAGIA DE LA ORIENTACIÓN */
+.servicios-grid {
+  display: grid;
+  /* En el cel (vertical) 1 columna, en horizontal/PC se ponen 2 o 3 */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 15px;
+  padding: 15px 0;
+}
+
+.categoria-btn {
   width: 100%;
-  height: 100%;
-  background-color: #000000;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* La tarjeta blanca flotante */
-.bolt-card {
-  background: white;
-  padding: 40px 32px;
-  border-radius: 28px;
-  width: 90%;
-  max-width: 360px;
-  text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-}
-
-/* El círculo rosa con el icono */
-.bolt-icon-circle {
-  width: 60px;
-  height: 60px;
-  background: #d15690;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 0 auto 24px;
-}
-
-.bolt-title {
-  font-size: 30px;
-  font-weight: 800;
-  margin: 0;
-  color: #111;
-}
-
-.bolt-welcome {
-  color: #666;
-  margin: 8px 0 32px 0;
-}
-
-/* Estilo de los campos para escribir */
-.bolt-form { text-align: left; }
-.bolt-input-group { margin-bottom: 20px; }
-.bolt-input-group label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #444;
-  margin-bottom: 8px;
-}
-
-.bolt-input-group input {
-  width: 100%;
-  padding: 14px;
-  border: 1.5px solid #eee;
-  border-radius: 12px;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-
-/* El botón rosa de Ingresar */
-.bolt-btn {
-  width: 100%;
-  padding: 16px;
-  background: #d15690;
-  color: white;
+  padding: 15px;
+  margin-bottom: 10px;
+  background-color: #fff0f3;
+  color: #ff85a1;
   border: none;
   border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
   cursor: pointer;
-  margin-top: 10px;
+}
+
+.categoria-btn.active {
+  background-color: #ff85a1;
+  color: white;
+}
+
+.servicio-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.servicio-card.selected {
+  border: 2px solid #ff85a1;
+  background: white;
+}
+
+.form-reserva {
+  max-width: 450px;
+  margin: 30px auto;
+  padding: 20px;
+  border: 1px solid #ffdeeb;
+  border-radius: 20px;
 }

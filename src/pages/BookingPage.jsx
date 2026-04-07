@@ -28,16 +28,29 @@ export default function BookingPage() {
 
     setLoading(true);
 
-    // LÓGICA ESPECIAL: PRESUPUESTO DE COLOR
+    // 1. VALIDACIÓN DE DÍA CERRADO ✨
+    const { data: diaCerrado } = await supabase
+      .from('closed_days')
+      .select('*')
+      .eq('closed_date', fecha)
+      .single();
+
+    if (diaCerrado) {
+      alert("¡Ay, lo sentimos! 🌸 Este día el estudio estará cerrado. Porfa, elige otra fecha para ponerte bella.");
+      setLoading(false);
+      return;
+    }
+
+    // 2. LÓGICA ESPECIAL: PRESUPUESTO DE COLOR
     if (servicioSeleccionado.is_color_budget) {
       const msg = encodeURIComponent(`¡Hola Martha! ✨ Soy ${perfil.full_name}. Quiero un presupuesto de color para el ${fecha}. 💖`);
-      window.open(`https://wa.me/584241234567?text=${msg}`, '_blank'); // Cambia por tu número
+      window.open(`https://wa.me/584241234567?text=${msg}`, '_blank'); // Cambia por tu número real
       alert("Solicitud enviada. Te avisaremos cuando tu presupuesto esté listo ✨");
       setLoading(false);
       return;
     }
 
-    // RESERVA NORMAL
+    // 3. RESERVA NORMAL
     const { error } = await supabase.from('appointments').insert([
       {
         user_id: perfil.id,
@@ -64,7 +77,6 @@ export default function BookingPage() {
       </header>
 
       <form onSubmit={handleReserva} style={formStyle}>
-        {/* SELECCIÓN DE SERVICIO */}
         <label style={label}>¿Qué servicio deseas?</label>
         <select 
           style={input} 
@@ -77,7 +89,6 @@ export default function BookingPage() {
           ))}
         </select>
 
-        {/* FECHA Y HORA */}
         <div style={{ display: 'flex', gap: '10px' }}>
           <div style={{ flex: 1 }}>
             <label style={label}>Día</label>
@@ -89,13 +100,11 @@ export default function BookingPage() {
           </div>
         </div>
 
-        {/* BOTÓN DINÁMICO */}
         <button type="submit" style={btnPrincipal} disabled={loading}>
           {loading ? 'Procesando...' : servicioSeleccionado?.is_color_budget ? 'Pedir Presupuesto 🎨' : 'Confirmar Cita 💖'}
         </button>
       </form>
 
-      {/* BANNER DE CIERRE */}
       <div style={footerBanner}>
         <p>¡Cita confirmada! 💖 Hasta entonces, mira nuestras redes o revisa nuestra vitrina.</p>
       </div>

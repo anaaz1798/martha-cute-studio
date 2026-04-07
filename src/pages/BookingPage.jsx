@@ -75,7 +75,6 @@ export default function BookingPage() {
     setLoading(false);
   };
 
-  // Agrupar servicios por categoría
   const serviciosAgrupados = servicios.reduce((acc, s) => {
     const cat = s.category || 'Otros';
     if (!acc[cat]) acc[cat] = [];
@@ -92,7 +91,7 @@ export default function BookingPage() {
 
       <div style={vitrinaContainer}>
         {Object.keys(serviciosAgrupados).map(cat => (
-          <div key={cat} style={{ marginBottom: '12px' }}>
+          <div key={cat} style={{ marginBottom: '15px' }}>
             <button 
               type="button"
               onClick={() => setCatAbierta(catAbierta === cat ? null : cat)}
@@ -128,7 +127,7 @@ export default function BookingPage() {
       {servicioSeleccionado && (
         <form onSubmit={handleReserva} style={formStyle}>
           <p style={{ textAlign: 'center', fontSize: '14px', color: '#ff85a1', marginBottom: '10px' }}>
-            Agendando: <strong>{servicioSeleccionado.name}</strong> 💅
+            Seleccionado: <strong>{servicioSeleccionado.name}</strong> 💅
           </p>
           <div style={{ display: 'flex', gap: '10px' }}>
             <div style={{ flex: 1 }}>
@@ -149,28 +148,24 @@ export default function BookingPage() {
   );
 }
 
-// --- ESTILOS NATIVOS ---
-const container = { minHeight: '100vh', backgroundColor: '#fff', padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' };
+const container = { minHeight: '100vh', backgroundColor: '#fff', padding: '20px', fontFamily: 'sans-serif', maxWidth: '1200px', margin: '0 auto' };
 const header = { textAlign: 'center', marginBottom: '25px' };
 const title = { color: '#000', fontSize: '26px', fontFamily: 'serif', margin: 0 };
 const subtitle = { color: '#ff85a1', fontSize: '14px', fontWeight: 'bold' };
-const vitrinaContainer = { marginBottom: '30px' };
+const vitrinaContainer = { width: '100%' };
 const categoryHeader = (active) => ({
   width: '100%', padding: '15px 20px', backgroundColor: active ? '#ff85a1' : '#fff0f3',
   color: active ? '#fff' : '#ff85a1', border: 'none', borderRadius: '15px',
-  display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer'
+  display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer', marginBottom: '10px'
 });
-const gridBanners = { display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px 5px' };
+const gridBanners = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '12px', padding: '10px 5px', marginBottom: '20px' };
 const servicioBanner = (active) => ({
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '15px 20px',
   borderRadius: '18px', border: active ? '2px solid #ff85a1' : '1px solid #eee',
   backgroundColor: active ? '#fff' : '#fafafa', cursor: 'pointer', transition: '0.3s'
 });
 const priceTag = { color: '#ff85a1', fontWeight: 'bold', fontSize: '18px' };
-const formStyle = { display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', border: '1px solid #ffdeeb', borderRadius: '20px', backgroundColor: '#fff' };
+const formStyle = { display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', border: '1px solid #ffdeeb', borderRadius: '20px', backgroundColor: '#fff', maxWidth: '500px', margin: '20px auto' };
 const label = { fontSize: '12px', fontWeight: 'bold', color: '#999', marginBottom: '5px', display: 'block' };
 const input = { width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #eee', boxSizing: 'border-box' };
-const btnPrincipal = { 
-  width: '100%', padding: '15px', borderRadius: '15px', border: 'none',
-  backgroundColor: '#000', color: '#ff85a1', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer'
-};
+const btnPrincipal = { width: '100%', padding: '15px', borderRadius: '15px', border: 'none', backgroundColor: '#000', color: '#ff85a1', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer' };

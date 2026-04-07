@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
-import { useNavigate } from 'react-router-dom'; // Para navegar al login
+import { useNavigate } from 'react-router-dom';
 import { sonarBrillitos } from '../utils/notifications';
 
 export default function BookingPage() {
@@ -11,56 +11,48 @@ export default function BookingPage() {
   const [hora, setHora] = useState('');
   const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [catAbierta, setCatAbierta] = useState(null);
 
   useEffect(() => {
     cargarDatos();
   }, []);
 
   async function cargarDatos() {
-    // 1. Cargamos servicios siempre (es público)
     const { data: s } = await supabase.from('services').select('*').eq('is_active', true);
     setServicios(s || []);
 
-    // 2. Revisamos si el usuario ya está logueado
     const { data: { user } } = await supabase.auth.getUser();
-    
     if (user) {
       const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
       setPerfil(p);
     }
 
-    // 3. ¿Venía un servicio pre-seleccionado de la vitrina? ✨
     const guardado = localStorage.getItem('servicio_interes');
     if (guardado) {
       const servicioObj = JSON.parse(guardado);
       setServicioSeleccionado(servicioObj);
-      localStorage.removeItem('servicio_interes'); // Limpiamos para que no se repita
+      localStorage.removeItem('servicio_interes');
     }
   }
 
   const handleReserva = async (e) => {
     e.preventDefault();
-    
-    // 🚨 FILTRO MAESTRO: Si no hay perfil (no logueado), pal' login
     if (!perfil) {
       localStorage.setItem('servicio_interes', JSON.stringify(servicioSeleccionado));
       alert("¡Casi lista! 💖 Inicia sesión rápido para confirmar tu cita.");
       return navigate('/login');
     }
-
     if (!servicioSeleccionado || !fecha || !hora) return alert("Llena todos los campos, hermosa ✨");
 
     setLoading(true);
-
-    // Validación de día cerrado
     const { data: diaCerrado } = await supabase.from('closed_days').select('*').eq('closed_date', fecha).single();
+    
     if (diaCerrado) {
       alert("¡Ay, lo sentimos! 🌸 Este día el estudio estará cerrado.");
       setLoading(false);
       return;
     }
 
-    // Lógica de Presupuesto de Color
     if (servicioSeleccionado.is_color_budget) {
       const msg = encodeURIComponent(`¡Hola Martha! ✨ Soy ${perfil.full_name}. Quiero presupuesto de color para el ${fecha}. 💖`);
       window.open(`https://wa.me/584241234567?text=${msg}`, '_blank');
@@ -68,24 +60,28 @@ export default function BookingPage() {
       return;
     }
 
-    // Reserva Normal
-    const { error } = await supabase.from('appointments').insert([
-      {
-        user_id: perfil.id,
-        service_id: servicioSeleccionado.id,
-        appointment_time: `${fecha}T${hora}:00`,
-        status: 'scheduled'
-      }
-    ]);
+    const { error } = await supabase.from('appointments').insert([{
+      user_id: perfil.id,
+      service_id: servicioSeleccionado.id,
+      appointment_time: `${fecha}T${hora}:00`,
+      status: 'scheduled'
+    }]);
 
-    if (error) {
-      alert("Hubo un error, intenta de nuevo");
-    } else {
+    if (error) alert("Hubo un error, intenta de nuevo");
+    else {
       sonarBrillitos();
       alert(`¡Cita confirmada, ${perfil.full_name.split(' ')[0]}! 💖 Te esperamos.`);
     }
     setLoading(false);
   };
+
+  // Agrupar servicios por categoría
+  const serviciosAgrupados = servicios.reduce((acc, s) => {
+    const cat = s.category || 'Otros';
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(s);
+    return acc;
+  }, {});
 
   return (
     <div style={container}>
@@ -94,39 +90,87 @@ export default function BookingPage() {
         <p style={subtitle}>Reserva tu Momento</p>
       </header>
 
-      <form onSubmit={handleReserva} style={formStyle}>
-        <label style={label}>¿Qué servicio deseas?</label>
-        <select 
-          style={input} 
-          value={servicioSeleccionado?.id || ""}
-          onChange={(e) => setServicioSeleccionado(servicios.find(s => s.id === parseInt(e.target.value)))}
-          required
-        >
-          <option value="">Selecciona un servicio...</option>
-          {servicios.map(s => (
-            <option key={s.id} value={s.id}>{s.name} - {s.is_color_budget ? 'Presupuesto' : `$${s.price}`}</option>
-          ))}
-        </select>
+      <div style={vitrinaContainer}>
+        {Object.keys(serviciosAgrupados).map(cat => (
+          <div key={cat} style={{ marginBottom: '12px' }}>
+            <button 
+              type="button"
+              onClick={() => setCatAbierta(catAbierta === cat ? null : cat)}
+              style={categoryHeader(catAbierta === cat)}
+            >
+              <span>{cat}</span>
+              <span>{catAbierta === cat ? '−' : '+'}</span>
+            </button>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <div style={{ flex: 1 }}>
-            <label style={label}>Día</label>
-            <input type="date" style={input} onChange={e => setFecha(e.target.value)} required />
+            {catAbierta === cat && (
+              <div style={gridBanners}>
+                {serviciosAgrupados[cat].map(s => (
+                  <div 
+                    key={s.id} 
+                    onClick={() => setServicioSeleccionado(s)}
+                    style={servicioBanner(servicioSeleccionado?.id === s.id)}
+                  >
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ margin: 0, fontSize: '15px' }}>{s.name}</h4>
+                      <p style={{ margin: '4px 0', fontSize: '12px', color: '#666' }}>{s.duration_minutes} min</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={priceTag}>${s.price}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-          <div style={{ flex: 1 }}>
-            <label style={label}>Hora</label>
-            <input type="time" style={input} onChange={e => setHora(e.target.value)} required />
-          </div>
-        </div>
+        ))}
+      </div>
 
-        <button type="submit" style={btnPrincipal} disabled={loading}>
-          {loading ? 'Procesando...' : !perfil ? 'Inicia sesión para agendar 🔑' : servicioSeleccionado?.is_color_budget ? 'Pedir Presupuesto 🎨' : 'Confirmar Cita 💖'}
-        </button>
-      </form>
-      
-      {/* (Resto de los estilos igual...) */}
+      {servicioSeleccionado && (
+        <form onSubmit={handleReserva} style={formStyle}>
+          <p style={{ textAlign: 'center', fontSize: '14px', color: '#ff85a1', marginBottom: '10px' }}>
+            Agendando: <strong>{servicioSeleccionado.name}</strong> 💅
+          </p>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={label}>Día</label>
+              <input type="date" style={input} onChange={e => setFecha(e.target.value)} required />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={label}>Hora</label>
+              <input type="time" style={input} onChange={e => setHora(e.target.value)} required />
+            </div>
+          </div>
+          <button type="submit" style={btnPrincipal} disabled={loading}>
+            {loading ? 'Procesando...' : !perfil ? 'Inicia sesión para agendar 🔑' : 'Confirmar Cita 💖'}
+          </button>
+        </form>
+      )}
     </div>
   );
 }
 
-// ... (Tus estilos nativos se mantienen iguales)
+// --- ESTILOS NATIVOS ---
+const container = { minHeight: '100vh', backgroundColor: '#fff', padding: '20px', fontFamily: 'sans-serif', maxWidth: '600px', margin: '0 auto' };
+const header = { textAlign: 'center', marginBottom: '25px' };
+const title = { color: '#000', fontSize: '26px', fontFamily: 'serif', margin: 0 };
+const subtitle = { color: '#ff85a1', fontSize: '14px', fontWeight: 'bold' };
+const vitrinaContainer = { marginBottom: '30px' };
+const categoryHeader = (active) => ({
+  width: '100%', padding: '15px 20px', backgroundColor: active ? '#ff85a1' : '#fff0f3',
+  color: active ? '#fff' : '#ff85a1', border: 'none', borderRadius: '15px',
+  display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer'
+});
+const gridBanners = { display: 'flex', flexDirection: 'column', gap: '10px', padding: '10px 5px' };
+const servicioBanner = (active) => ({
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '15px 20px',
+  borderRadius: '18px', border: active ? '2px solid #ff85a1' : '1px solid #eee',
+  backgroundColor: active ? '#fff' : '#fafafa', cursor: 'pointer', transition: '0.3s'
+});
+const priceTag = { color: '#ff85a1', fontWeight: 'bold', fontSize: '18px' };
+const formStyle = { display: 'flex', flexDirection: 'column', gap: '15px', padding: '20px', border: '1px solid #ffdeeb', borderRadius: '20px', backgroundColor: '#fff' };
+const label = { fontSize: '12px', fontWeight: 'bold', color: '#999', marginBottom: '5px', display: 'block' };
+const input = { width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #eee', boxSizing: 'border-box' };
+const btnPrincipal = { 
+  width: '100%', padding: '15px', borderRadius: '15px', border: 'none',
+  backgroundColor: '#000', color: '#ff85a1', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer'
+};

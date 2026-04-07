@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { sonarBrillitos } from '../utils/notifications';
 
 export default function BookingPage() {
@@ -18,30 +18,32 @@ export default function BookingPage() {
   }, []);
 
   async function cargarDatos() {
-    const { data: s } = await supabase.from('services').select('*').eq('is_active', true);
-    setServicios(s || []);
+    try {
+      const { data: s } = await supabase.from('services').select('*').eq('is_active', true);
+      setServicios(s || []);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      setPerfil(p);
-    }
-
-    const guardado = localStorage.getItem('servicio_interes');
-    if (guardado) {
-      const servicioObj = JSON.parse(guardado);
-      setServicioSeleccionado(servicioObj);
-      localStorage.removeItem('servicio_interes');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        setPerfil(p);
+      }
+    } catch (err) {
+      console.log("Error cargando datos:", err);
     }
   }
 
   const handleReserva = async (e) => {
     e.preventDefault();
+    
+    // Si no hay perfil, lo mandamos al login de una vez
     if (!perfil) {
-      localStorage.setItem('servicio_interes', JSON.stringify(servicioSeleccionado));
-      alert("¡Casi lista! 💖 Inicia sesión rápido para confirmar tu cita.");
-      return navigate('/login');
+      if (servicioSeleccionado) {
+        localStorage.setItem('servicio_interes', JSON.stringify(servicioSeleccionado));
+      }
+      alert("¡Hola, bella! ✨ Inicia sesión para confirmar tu cita.");
+      return navigate('/login'); 
     }
+
     if (!servicioSeleccionado || !fecha || !hora) return alert("Llena todos los campos, hermosa ✨");
 
     setLoading(true);
@@ -67,10 +69,11 @@ export default function BookingPage() {
       status: 'scheduled'
     }]);
 
-    if (error) alert("Hubo un error, intenta de nuevo");
-    else {
+    if (error) {
+      alert("Hubo un error al reservar. Revisa tu conexión.");
+    } else {
       sonarBrillitos();
-      alert(`¡Cita confirmada, ${perfil.full_name.split(' ')[0]}! 💖 Te esperamos.`);
+      alert(`¡Cita confirmada! 💖 Te esperamos.`);
     }
     setLoading(false);
   };
@@ -85,6 +88,13 @@ export default function BookingPage() {
   return (
     <div style={container}>
       <header style={header}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+          {!perfil && (
+            <Link to="/login" style={{ color: '#ff85a1', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}>
+              Entrar / Iniciar Sesión 🔑
+            </Link>
+          )}
+        </div>
         <h2 style={title}>Martha Cute Studio ✨</h2>
         <p style={subtitle}>Reserva tu Momento</p>
       </header>

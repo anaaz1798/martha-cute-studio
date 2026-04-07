@@ -1,78 +1,71 @@
-import { useState, useEffect } from 'react';
-import { supabase } from './supabase';
-
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import HomePage from './pages/HomePage';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import ServicesPage from './pages/ServicesPage';
-import AppointmentsPage from './pages/AppointmentsPage';
-import EventsPage from './pages/EventsPage';
 import VitrinaPage from './pages/VitrinaPage';
-import AdminPage from './pages/AdminPage';
+import AdminPanel from './pages/AdminPanel';
+import SignUp from './pages/SignUp';
+// Importa aquí tus otras páginas (Login, Home, etc.)
 
 export default function App() {
-  const [session, setSession] = useState(null);
-  const [currentPage, setCurrentPage] = useState('home');
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (!session) {
-    return <LoginPage />;
-  }
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'home': return <HomePage />;
-      case 'services': return <ServicesPage />;
-      case 'appointments': return <AppointmentsPage />;
-      case 'events': return <EventsPage />;
-      case 'vitrina': return <VitrinaPage />;
-      case 'admin': return <AdminPage />;
-      default: return <HomePage />;
-    }
-  };
-
   return (
-    <div style={{ backgroundColor: '#000', minHeight: '100vh' }}>
-      {/* Menu de navegacion rapida */}
-      <nav style={{
-        display: 'flex', 
-        justifyContent: 'center', 
-        gap: '15px', 
-        padding: '15px', 
-        background: '#111',
-        overflowX: 'auto'
-      }}>
-        <button onClick={() => setCurrentPage('home')} style={navBtnStyle}>Inicio</button>
-        <button onClick={() => setCurrentPage('services')} style={navBtnStyle}>Servicios</button>
-        <button onClick={() => setCurrentPage('appointments')} style={navBtnStyle}>Citas</button>
-        <button onClick={() => setCurrentPage('vitrina')} style={navBtnStyle}>Vitrina</button>
-        <button onClick={() => setCurrentPage('admin')} style={{...navBtnStyle, color: '#d15690'}}>Admin</button>
-        <button onClick={() => supabase.auth.signOut()} style={navBtnStyle}>Salir</button>
-      </nav>
+    <Router>
+      <div style={{ minHeight: '100vh', backgroundColor: '#fafafa', paddingBottom: '70px' }}>
+        
+        {/* Logo / Header */}
+        <header style={{ padding: '20px', textAlign: 'center', backgroundColor: '#fff', borderBottom: '1px solid #eee' }}>
+          <h1 style={{ margin: 0, color: '#d15690', fontSize: '24px', fontFamily: 'serif' }}>The Cute Studio</h1>
+        </header>
 
-      <div style={{ padding: '20px' }}>
-        {renderPage()}
+        {/* Cuerpo de la App */}
+        <main style={{ padding: '10px' }}>
+          <Routes>
+            <Route path="/" element={<ServicesPage />} />
+            <Route path="/vitrina" element={<VitrinaPage />} />
+            <Route path="/registro" element={<SignUp />} />
+            <Route path="/admin-pro" element={<AdminPanel />} />
+            {/* Agrega más rutas según necesites */}
+          </Routes>
+        </main>
+
+        {/* Menú de Navegación Inferior (Estilo App Movil) */}
+        <nav style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '65px',
+          backgroundColor: '#fff',
+          display: 'flex',
+          justifyContent: 'space-around',
+          alignItems: 'center',
+          borderTop: '1px solid #eee',
+          boxShadow: '0 -2px 10px rgba(0,0,0,0.05)',
+          zIndex: 1000
+        }}>
+          <Link to="/" style={linkStyle}>🏠<span style={labelStyle}>Servicios</span></Link>
+          <Link to="/vitrina" style={linkStyle}>🛍️<span style={labelStyle}>Vitrina</span></Link>
+          <Link to="/registro" style={linkStyle}>👤<span style={labelStyle}>Perfil</span></Link>
+          {/* Este solo lo ves tú, puedes ocultarlo después con lógica de Admin */}
+          <Link to="/admin-pro" style={linkStyle}>⚙️<span style={labelStyle}>Admin</span></Link>
+        </nav>
+
       </div>
-    </div>
+    </Router>
   );
 }
 
-const navBtnStyle = {
-  background: 'none',
-  border: 'none',
-  color: '#fff',
-  fontSize: '14px',
-  fontWeight: '600',
-  cursor: 'pointer'
+// --- ESTILOS RÁPIDOS ---
+const linkStyle = {
+  textDecoration: 'none',
+  fontSize: '20px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  color: '#666'
+};
+
+const labelStyle = {
+  fontSize: '10px',
+  marginTop: '4px',
+  fontWeight: 'bold',
+  textTransform: 'uppercase'
 };

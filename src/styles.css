@@ -1,59 +1,50 @@
-/* Estilo General */
-.booking-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: sans-serif;
+:root {
+  --martha-pink: #e91e63;
+  --bg-light: #f9fafb;
 }
 
-/* LA MAGIA DE LA ORIENTACIÓN */
-.servicios-grid {
-  display: grid;
-  /* En el cel (vertical) 1 columna, en horizontal/PC se ponen 2 o 3 */
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 15px;
-  padding: 15px 0;
+body { background-color: var(--bg-light); margin: 0; font-family: sans-serif; }
+
+.martha-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+/* Encabezado con Icono */
+.martha-header {
+  display: flex; align-items: center; gap: 12px;
+  background: white; padding: 15px; border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 25px;
 }
 
-.categoria-btn {
-  width: 100%;
-  padding: 15px;
-  margin-bottom: 10px;
-  background-color: #fff0f3;
-  color: #ff85a1;
-  border: none;
-  border-radius: 12px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  cursor: pointer;
+/* Categorías */
+.category-section { margin-bottom: 25px; }
+.category-title { 
+  display: flex; align-items: center; gap: 8px;
+  font-size: 18px; font-weight: bold; color: #374151; margin-bottom: 12px;
 }
 
-.categoria-btn.active {
-  background-color: #ff85a1;
-  color: white;
+/* Tarjetas de Servicio - Estilo Bolt */
+.service-list { display: flex; flexDirection: column; gap: 10px; }
+.service-item {
+  background: white; padding: 16px; border-radius: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  border: 1px solid #f3f4f6; transition: 0.2s;
+}
+.service-item:hover { border-color: var(--martha-pink); }
+
+.service-info h4 { margin: 0; font-size: 16px; color: #111827; }
+.service-info p { margin: 4px 0 0; font-size: 13px; color: #6b7280; }
+
+.service-right { display: flex; align-items: center; gap: 15px; }
+.price { font-weight: bold; font-size: 18px; color: #111827; }
+
+.btn-book {
+  background: var(--martha-pink); color: white; border: none;
+  padding: 8px 16px; border-radius: 8px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
 }
 
-.servicio-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px;
-  background: #fafafa;
+/* Formulario Flotante */
+.booking-card {
+  background: white; padding: 20px; border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-top: 30px;
   border: 1px solid #eee;
-  border-radius: 15px;
-  cursor: pointer;
-}
-
-.servicio-card.selected {
-  border: 2px solid #ff85a1;
-  background: white;
-}
-
-.form-reserva {
-  max-width: 450px;
-  margin: 30px auto;
-  padding: 20px;
-  border: 1px solid #ffdeeb;
-  border-radius: 20px;
 }

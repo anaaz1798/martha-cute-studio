@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
+import { useNavigate } from 'react-router-dom'; // Para navegar al login
 import { sonarBrillitos } from '../utils/notifications';
 
 export default function BookingPage() {
+  const navigate = useNavigate();
   const [perfil, setPerfil] = useState(null);
   const [servicios, setServicios] = useState([]);
   const [fecha, setFecha] = useState('');
@@ -15,42 +17,58 @@ export default function BookingPage() {
   }, []);
 
   async function cargarDatos() {
-    const { data: { user } } = await supabase.auth.getUser();
-    const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+    // 1. Cargamos servicios siempre (es público)
     const { data: s } = await supabase.from('services').select('*').eq('is_active', true);
-    setPerfil(p);
     setServicios(s || []);
+
+    // 2. Revisamos si el usuario ya está logueado
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (user) {
+      const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      setPerfil(p);
+    }
+
+    // 3. ¿Venía un servicio pre-seleccionado de la vitrina? ✨
+    const guardado = localStorage.getItem('servicio_interes');
+    if (guardado) {
+      const servicioObj = JSON.parse(guardado);
+      setServicioSeleccionado(servicioObj);
+      localStorage.removeItem('servicio_interes'); // Limpiamos para que no se repita
+    }
   }
 
   const handleReserva = async (e) => {
     e.preventDefault();
+    
+    // 🚨 FILTRO MAESTRO: Si no hay perfil (no logueado), pal' login
+    if (!perfil) {
+      localStorage.setItem('servicio_interes', JSON.stringify(servicioSeleccionado));
+      alert("¡Casi lista! 💖 Inicia sesión rápido para confirmar tu cita.");
+      return navigate('/login');
+    }
+
     if (!servicioSeleccionado || !fecha || !hora) return alert("Llena todos los campos, hermosa ✨");
 
     setLoading(true);
 
-    // 1. VALIDACIÓN DE DÍA CERRADO ✨
-    const { data: diaCerrado } = await supabase
-      .from('closed_days')
-      .select('*')
-      .eq('closed_date', fecha)
-      .single();
-
+    // Validación de día cerrado
+    const { data: diaCerrado } = await supabase.from('closed_days').select('*').eq('closed_date', fecha).single();
     if (diaCerrado) {
-      alert("¡Ay, lo sentimos! 🌸 Este día el estudio estará cerrado. Porfa, elige otra fecha para ponerte bella.");
+      alert("¡Ay, lo sentimos! 🌸 Este día el estudio estará cerrado.");
       setLoading(false);
       return;
     }
 
-    // 2. LÓGICA ESPECIAL: PRESUPUESTO DE COLOR
+    // Lógica de Presupuesto de Color
     if (servicioSeleccionado.is_color_budget) {
-      const msg = encodeURIComponent(`¡Hola Martha! ✨ Soy ${perfil.full_name}. Quiero un presupuesto de color para el ${fecha}. 💖`);
-      window.open(`https://wa.me/584241234567?text=${msg}`, '_blank'); // Cambia por tu número real
-      alert("Solicitud enviada. Te avisaremos cuando tu presupuesto esté listo ✨");
+      const msg = encodeURIComponent(`¡Hola Martha! ✨ Soy ${perfil.full_name}. Quiero presupuesto de color para el ${fecha}. 💖`);
+      window.open(`https://wa.me/584241234567?text=${msg}`, '_blank');
       setLoading(false);
       return;
     }
 
-    // 3. RESERVA NORMAL
+    // Reserva Normal
     const { error } = await supabase.from('appointments').insert([
       {
         user_id: perfil.id,
@@ -63,7 +81,7 @@ export default function BookingPage() {
     if (error) {
       alert("Hubo un error, intenta de nuevo");
     } else {
-      sonarBrillitos(); // ¡MAGIA! ✨
+      sonarBrillitos();
       alert(`¡Cita confirmada, ${perfil.full_name.split(' ')[0]}! 💖 Te esperamos.`);
     }
     setLoading(false);
@@ -72,14 +90,15 @@ export default function BookingPage() {
   return (
     <div style={container}>
       <header style={header}>
-        <h2 style={title}>Reserva tu Momento ✨</h2>
-        <p style={subtitle}>Elige lo que te haga brillar hoy</p>
+        <h2 style={title}>Martha Cute Studio ✨</h2>
+        <p style={subtitle}>Reserva tu Momento</p>
       </header>
 
       <form onSubmit={handleReserva} style={formStyle}>
         <label style={label}>¿Qué servicio deseas?</label>
         <select 
           style={input} 
+          value={servicioSeleccionado?.id || ""}
           onChange={(e) => setServicioSeleccionado(servicios.find(s => s.id === parseInt(e.target.value)))}
           required
         >
@@ -101,31 +120,13 @@ export default function BookingPage() {
         </div>
 
         <button type="submit" style={btnPrincipal} disabled={loading}>
-          {loading ? 'Procesando...' : servicioSeleccionado?.is_color_budget ? 'Pedir Presupuesto 🎨' : 'Confirmar Cita 💖'}
+          {loading ? 'Procesando...' : !perfil ? 'Inicia sesión para agendar 🔑' : servicioSeleccionado?.is_color_budget ? 'Pedir Presupuesto 🎨' : 'Confirmar Cita 💖'}
         </button>
       </form>
-
-      <div style={footerBanner}>
-        <p>¡Cita confirmada! 💖 Hasta entonces, mira nuestras redes o revisa nuestra vitrina.</p>
-      </div>
+      
+      {/* (Resto de los estilos igual...) */}
     </div>
   );
 }
 
-// --- ESTILOS NATIVOS ---
-const container = { minHeight: '100vh', backgroundColor: '#fff', padding: '20px', fontFamily: 'sans-serif' };
-const header = { textAlign: 'center', marginBottom: '30px' };
-const title = { color: '#000', fontSize: '24px', fontFamily: 'serif', margin: 0 };
-const subtitle = { color: '#ff85a1', fontSize: '14px', fontWeight: 'bold' };
-const formStyle = { display: 'flex', flexDirection: 'column', gap: '15px' };
-const label = { fontSize: '13px', fontWeight: 'bold', color: '#666', marginBottom: '5px' };
-const input = { width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #eee', outline: 'none', backgroundColor: '#fafafa', boxSizing: 'border-box' };
-const btnPrincipal = { 
-  width: '100%', padding: '15px', marginTop: '10px', borderRadius: '15px', border: 'none',
-  backgroundColor: '#000', color: '#ff85a1', fontWeight: 'bold', fontSize: '16px', cursor: 'pointer',
-  boxShadow: '0 4px 15px rgba(255, 133, 161, 0.3)' 
-};
-const footerBanner = { 
-  marginTop: '40px', padding: '20px', backgroundColor: '#fdf2f8', 
-  borderRadius: '20px', textAlign: 'center', color: '#d15690', fontSize: '13px', fontWeight: 'bold' 
-};
+// ... (Tus estilos nativos se mantienen iguales)

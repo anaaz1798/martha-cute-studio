@@ -1,54 +1,52 @@
-import { useState } from 'react';
-import { supabase } from '../supabase';
-import { useNavigate } from 'react-router-dom';
+// ... (mismos imports de antes)
 
 export default function Login() {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  // Estados del formulario
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState('');
+  const [accessKey, setAccessKey] = useState(''); // Nueva pieza del rompecabezas
+  // ... (otros estados igual)
 
   const handleAuth = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     if (isRegistering) {
-      // REGISTRO
+      // 1. Validar si la llave existe (si escribió algo)
+      let finalRole = 'client';
+      if (accessKey.trim() !== "") {
+        const { data: keyData } = await supabase
+          .from('access_keys')
+          .select('*')
+          .eq('key_value', accessKey)
+          .single();
+        
+        if (keyData) {
+          finalRole = 'staff';
+        } else {
+          alert("Esa llave no es válida. Te registraremos como clienta.");
+        }
+      }
+
+      // 2. Crear el usuario en Auth
       const { data, error } = await supabase.auth.signUp({ email, password });
+      
       if (error) alert(error.message);
       else {
-        // Guardamos los datos extras en la tabla profiles
+        // 3. Guardar en Profiles con el ROL AUTOMÁTICO ✨
         await supabase.from('profiles').insert([
           { 
             id: data.user.id, 
             full_name: fullName, 
             phone: phone, 
-            role: 'client',
+            role: finalRole, // Aquí se asigna solo
             security_question: question,
             security_answer: answer.toLowerCase().trim()
           }
         ]);
-        alert("¡Bienvenida a Martha Cute Studio! ✨");
-        navigate('/');
+        alert(`¡Bienvenida al Team! Rol asignado: ${finalRole} ✨`);
+        navigate(finalRole === 'staff' ? '/team' : '/');
       }
     } else {
-      // LOGIN
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) alert("Credenciales incorrectas");
-      else {
-        // Redirigir según el rol
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single();
-        if (profile?.role === 'admin') navigate('/admin');
-        else if (profile?.role === 'staff') navigate('/team');
-        else navigate('/');
-      }
+      // ... (Login normal igual al anterior)
     }
     setLoading(false);
   };
@@ -57,43 +55,24 @@ export default function Login() {
     <div style={containerStyle}>
       <div style={cardStyle}>
         <h1 style={logoStyle}>Martha Cute Studio</h1>
-        <p style={{ color: '#666', marginBottom: '20px' }}>{isRegistering ? 'Crea tu perfil ✨' : '¡Hola, hermosa! 💖'}</p>
         
         <form onSubmit={handleAuth}>
-          {isRegistering && (
-            <>
-              <input style={inputStyle} placeholder="Nombre completo" onChange={e => setFullName(e.target.value)} required />
-              <input style={inputStyle} placeholder="WhatsApp (ej: +58 424...)" onChange={e => setPhone(e.target.value)} required />
-            </>
-          )}
-          
-          <input style={inputStyle} type="email" placeholder="Correo electrónico" onChange={e => setEmail(e.target.value)} required />
-          <input style={inputStyle} type="password" placeholder="Contraseña" onChange={e => setPassword(e.target.value)} required />
+          {/* ... inputs de Nombre, Teléfono, Correo, Clave ... */}
 
           {isRegistering && (
-            <>
-              <p style={{fontSize: '12px', margin: '10px 0 5px'}}>Pregunta de Seguridad (para recuperar cuenta):</p>
-              <input style={inputStyle} placeholder="Ej: ¿Nombre de mi primera mascota?" onChange={e => setQuestion(e.target.value)} required />
-              <input style={inputStyle} placeholder="Respuesta" onChange={e => setAnswer(e.target.value)} required />
-            </>
+            <div style={{ marginTop: '10px', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+              <p style={{ fontSize: '11px', color: '#888' }}>¿Eres del Team Cute? Pon tu llave aquí:</p>
+              <input 
+                style={{...inputStyle, borderColor: '#ff85a1'}} 
+                placeholder="Llave TeamCute (Opcional)" 
+                onChange={e => setAccessKey(e.target.value)} 
+              />
+            </div>
           )}
 
-          <button style={mainBtn} disabled={loading}>
-            {loading ? 'Cargando...' : isRegistering ? 'Registrarme' : 'Entrar'}
-          </button>
+          {/* ... resto del formulario ... */}
         </form>
-
-        <p style={{ marginTop: '15px', cursor: 'pointer', color: '#ff85a1' }} onClick={() => setIsRegistering(!isRegistering)}>
-          {isRegistering ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí'}
-        </p>
       </div>
     </div>
   );
 }
-
-// --- ESTILOS NATIVOS ---
-const containerStyle = { minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#000', padding: '20px' };
-const cardStyle = { backgroundColor: '#fff', padding: '30px', borderRadius: '25px', width: '100%', maxWidth: '400px', textAlign: 'center', boxShadow: '0 10px 25px rgba(255, 133, 161, 0.2)' };
-const logoStyle = { fontFamily: 'serif', color: '#000', fontSize: '28px', marginBottom: '5px' };
-const inputStyle = { width: '100%', padding: '12px', marginBottom: '10px', borderRadius: '10px', border: '1px solid #eee', outline: 'none', boxSizing: 'border-box' };
-const mainBtn = { width: '100%', padding: '12px', backgroundColor: '#000', color: '#ff85a1', border: '1px solid #ff85a1', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' };

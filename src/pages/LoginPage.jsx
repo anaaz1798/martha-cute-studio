@@ -1,14 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Scissors, Wand2, Star, Sparkle, Calendar, LogIn } from 'lucide-react';
+import { Sparkles, Calendar } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [servicios, setServicios] = useState([]);
-  const [showAuth, setShowAuth] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
 
   useEffect(() => {
     async function cargar() {
@@ -18,69 +15,48 @@ export default function LoginPage() {
     cargar();
   }, []);
 
-  const handleAuth = async (e) => {
-    e.preventDefault();
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      navigate('/admin');
-    } catch (err) { alert(err.message); }
-  };
-
-  const iconMap = { 'CABELLO': Scissors, 'CEJAS': Sparkle, 'PESTAÑAS': Wand2, 'UÑAS': Star, 'DEFAULT': Sparkles };
+  // Agrupamos servicios para sacar las categorías
   const categoriasUnicas = [...new Set(servicios.map(s => s.category?.toUpperCase() || 'OTROS'))];
 
   return (
-    <div className="min-h-screen bg-[#fdfafb] pb-20 px-4">
-      <main className="max-w-4xl mx-auto pt-6 space-y-8">
+    <div className="min-h-screen bg-[#fdfafb] pb-6 px-4 font-sans">
+      <main className="max-w-md mx-auto pt-4 space-y-4">
         
-        {/* LOGIN DISCRETO */}
-        <div className="flex justify-end opacity-30">
-          <button onClick={() => setShowAuth(!showAuth)} className="p-2 hover:text-[#d81b60]"><LogIn className="w-5 h-5" /></button>
-        </div>
-
-        {/* BIENVENIDA */}
-        <section className="bg-white rounded-[40px] p-12 text-center shadow-sm border border-pink-50/50">
-          <div className="bg-[#d81b60] w-20 h-20 rounded-[28px] flex items-center justify-center mx-auto mb-6 rotate-6 shadow-lg shadow-pink-100">
-            <Sparkles className="text-white w-10 h-10" />
+        {/* HEADER COMPACTO */}
+        <section className="bg-white rounded-[28px] p-4 text-center shadow-sm border border-pink-50/50">
+          <div className="bg-[#d81b60] w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-md">
+            <Sparkles className="text-white w-5 h-5" />
           </div>
-          <h1 className="text-4xl font-black text-gray-900 tracking-tighter uppercase mb-2">Martha Cute Studio</h1>
-          <p className="text-gray-400 text-sm font-medium mb-10 max-w-md mx-auto">Reserva tu cita y vive la experiencia Cute.</p>
-          
-          {/* CAMBIO: AHORA LLEVA DIRECTO A RESERVAR */}
+          <h1 className="text-lg font-black text-gray-900 uppercase">Martha Cute Studio</h1>
           <button 
             onClick={() => navigate('/reservar')} 
-            className="bg-[#d81b60] text-white font-bold py-5 px-10 rounded-[22px] shadow-lg shadow-pink-200 flex items-center justify-center gap-2 active:scale-95 transition-all text-xs uppercase tracking-widest mx-auto"
+            className="mt-3 w-full bg-[#d81b60] text-white font-bold py-3 rounded-xl text-[10px] uppercase tracking-widest active:scale-95 transition-all shadow-md"
           >
-            <Calendar className="w-5 h-5" /> Reservar Cita
+            Reservar Cita
           </button>
         </section>
 
-        {showAuth && (
-          <section className="bg-white rounded-[32px] p-6 shadow-sm border border-pink-50 max-w-sm mx-auto animate-in fade-in zoom-in duration-200">
-            <form onSubmit={handleAuth} className="space-y-3">
-              <input className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm outline-none border-none" type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} />
-              <input className="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm outline-none border-none" type="password" placeholder="Clave" onChange={e => setPassword(e.target.value)} />
-              <button className="w-full bg-gray-900 text-white font-bold py-3 rounded-xl text-[10px] uppercase tracking-widest">Entrar</button>
-            </form>
-          </section>
-        )}
-
-        {/* BANNERS DE CATEGORÍAS */}
-        <div className="pt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* BANNERS CON FOTOS CARGADAS */}
+        <div className="grid grid-cols-2 gap-3">
           {categoriasUnicas.map(cat => {
-            const Icono = iconMap[cat] || iconMap['DEFAULT'];
+            // Buscamos si algún servicio de esta categoría tiene imagen
+            const servicioConImagen = servicios.find(s => s.category?.toUpperCase() === cat && s.image_url);
+            const bgImage = servicioConImagen?.image_url || 'https://via.placeholder.com/300';
+
             return (
               <div 
                 key={cat} 
                 onClick={() => navigate(`/reservar?categoria=${cat}`)}
-                className="bg-white rounded-[40px] p-10 shadow-sm border border-gray-100 flex flex-col items-center text-center space-y-6 cursor-pointer hover:border-pink-200 active:scale-[0.98] transition-all"
+                className="relative h-32 rounded-[20px] overflow-hidden shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-all group"
               >
-                <div className="bg-pink-50 p-6 rounded-[32px] text-[#d81b60]">
-                  <Icono className="w-12 h-12" />
+                {/* Imagen de Fondo */}
+                <img src={bgImage} alt={cat} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                
+                {/* Capa oscura para que se lea el texto */}
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-2">
+                  <h4 className="font-black text-white text-[10px] uppercase tracking-tighter drop-shadow-md">{cat}</h4>
+                  <span className="text-[8px] font-bold text-pink-200 uppercase mt-1">Ver menú</span>
                 </div>
-                <h4 className="font-black text-gray-900 text-2xl tracking-tighter uppercase">{cat}</h4>
-                <div className="bg-gray-900 text-white text-[9px] font-black px-6 py-3 rounded-full uppercase tracking-[0.2em]">Ver Servicios</div>
               </div>
             );
           })}

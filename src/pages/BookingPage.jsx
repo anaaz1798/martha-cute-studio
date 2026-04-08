@@ -11,32 +11,58 @@ export default function BookingPage() {
   const [seleccionado, setSeleccionado] = useState(null);
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function cargar() {
-      const { data: s } = await supabase.from('services').select('*').eq('is_active', true);
-      setServicios(s || []);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: p } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        setPerfil(p);
+      try {
+        // 1. Traemos todos los servicios (sin el filtro is_active que daba error)
+        const { data: s, error: sError } = await supabase
+          .from('services')
+          .select('*');
+        
+        if (sError) throw sError;
+        setServicios(s || []);
+
+        // 2. Revisamos si hay sesión para el perfil
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: p } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+          setPerfil(p);
+        }
+      } catch (err) {
+        console.error("Error en la carga:", err.message);
+      } finally {
+        setLoading(false);
       }
     }
     cargar();
   }, []);
 
-  const iconMap = { 'Uñas': '💅', 'Pestañas': '✨', 'Cejas': '👁️', 'Cabello': '💇‍♀️' };
+  // Iconos adaptados a tus categorías en Mayúsculas (según tu captura)
+  const iconMap = { 
+    'UÑAS': '💅', 
+    'PESTAÑAS': '✨', 
+    'CEJAS': '👁️', 
+    'CABELLO': '💇‍♀️',
+    'OTROS': '🌸'
+  };
 
   const agrupados = servicios.reduce((acc, s) => {
-    const cat = s.category || 'Otros';
+    const cat = s.category ? s.category.toUpperCase() : 'OTROS';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(s);
     return acc;
   }, {});
 
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-bold text-[#d81b60]">Cargando servicios...</div>;
+
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      {/* Header Fucsia - Color Fijo para evitar errores */}
       <header style={{ backgroundColor: '#d81b60' }} className="p-4 shadow-md flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-2 text-white">
           <Sparkles className="w-6 h-6" />
@@ -51,6 +77,10 @@ export default function BookingPage() {
 
       <main className="max-w-md mx-auto p-4 space-y-6">
         <h2 className="text-2xl font-black text-gray-800 mt-4">Nuestros Servicios</h2>
+
+        {servicios.length === 0 && (
+          <p className="text-center text-gray-500">No se encontraron servicios en la base de datos.</p>
+        )}
 
         {Object.keys(agrupados).map(cat => (
           <div key={cat} className="space-y-3">
@@ -72,7 +102,7 @@ export default function BookingPage() {
                   <div className="space-y-1">
                     <h4 className="font-bold text-gray-900">{s.name}</h4>
                     <div className="flex items-center gap-1 text-gray-400 text-xs font-medium">
-                      <Clock className="w-3 h-3" /> {s.duration_minutes} min
+                      <Clock className="w-3 h-3" /> {s.duration_minutes || 0} min
                     </div>
                   </div>
                   <div className="flex items-center gap-3">

@@ -1,120 +1,106 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
-import { ChevronLeft, MessageCircle } from 'lucide-react';
+import { ChevronLeft, MessageCircle, Clock } from 'lucide-react';
 
 export default function Reservar() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const serviceId = searchParams.get('servicio');
+  const catParam = searchParams.get('categoria'); 
   
-  const [loading, setLoading] = useState(false);
   const [servicios, setServicios] = useState([]);
-  const [whatsappMartha, setWhatsappMartha] = useState('+58 412-1663968'); // Por ahora fijo, luego de config
-  
-  const [formData, setFormData] = useState({
-    fullName: '', phone: '', email: '', date: '', time: '', notes: ''
-  });
+  const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
+  const [formData, setFormData] = useState({ fullName: '', phone: '', email: '', date: '', time: '' });
 
   useEffect(() => {
     async function cargar() {
-      const { data } = await supabase.from('services').select('*');
+      let query = supabase.from('services').select('*');
+      if (catParam) query = query.eq('category', catParam);
+      const { data } = await query;
       setServicios(data || []);
-      
-      // Intentar cargar el WhatsApp desde una tabla de configuración si existe
-      const { data: config } = await supabase.from('settings').select('value').eq('key', 'whatsapp_number').single();
-      if (config) setWhatsappMartha(config.value);
     }
     cargar();
-  }, []);
+  }, [catParam]);
 
   const handleConfirmar = async (e) => {
     e.preventDefault();
-    if (!formData.date || !formData.time) return alert("Por favor selecciona fecha y hora");
-    
-    setLoading(true);
+    if (!servicioSeleccionado) return alert("Selecciona un servicio");
     try {
-      // 1. Upsert del perfil usando el teléfono como identificador
-      const { data: profile, error: pError } = await supabase
-        .from('profiles')
-        .upsert({ 
-          full_name: formData.fullName, 
-          phone: formData.phone, 
-          email: formData.email,
-          role: 'client' 
-        }, { onConflict: 'phone' })
-        .select().single();
+      const { data: profile } = await supabase.from('profiles').upsert({ 
+        full_name: formData.fullName, phone: formData.phone, role: 'client' 
+      }, { onConflict: 'phone' }).select().single();
 
-      if (pError) throw pError;
-
-      // 2. Crear la cita
-      const { error: aError } = await supabase.from('appointments').insert([{
+      await supabase.from('appointments').insert([{
         profile_id: profile.id,
-        service_id: serviceId,
+        service_id: servicioSeleccionado.id,
         appointment_date: formData.date,
         appointment_time: formData.time,
-        notes: formData.notes,
         status: 'pending'
       }]);
 
-      if (aError) throw aError;
-
-      alert("¡Cita reservada con éxito! Martha la revisará pronto.");
+      alert("¡Cita agendada! Martha te contactará pronto.");
       navigate('/');
-    } catch (err) { alert("Error: " + err.message); }
-    finally { setLoading(false); }
+    } catch (err) { alert(err.message); }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-10">
-      <div className="bg-[#d81b60] text-white p-4 flex items-center gap-3 shadow-md">
-        <button onClick={() => navigate(-1)}><ChevronLeft className="w-6 h-6" /></button>
-        <span className="font-bold uppercase text-xs tracking-widest">Martha Cute Studio</span>
-      </div>
+    <div className="min-h-screen bg-gray-50 pb-20 font-sans text-gray-900">
+      <nav className="bg-[#d81b60] text-white p-5 flex items-center justify-between shadow-md">
+        <button onClick={() => navigate(-1)} className="bg-white/20 p-2 rounded-full"><ChevronLeft className="w-5 h-5" /></button>
+        <span className="font-black uppercase text-[10px] tracking-[0.4em]">Martha Cute Studio</span>
+        <div className="w-9" />
+      </nav>
 
-      <main className="max-w-3xl mx-auto mt-6 px-4">
-        <div className="bg-white rounded-xl shadow-lg p-6 space-y-8">
-          <h2 className="text-xl font-bold text-gray-800 border-b pb-2">Reservar Cita</h2>
+      <main className="max-w-2xl mx-auto mt-8 px-4 space-y-6">
+        <div className="bg-white rounded-[40px] p-8 md:p-12 shadow-sm border border-gray-100">
+          <h2 className="text-3xl font-black tracking-tighter uppercase mb-8 italic">Reservar Cita</h2>
 
-          <form onSubmit={handleConfirmar} className="space-y-6">
-            {/* Botón WhatsApp de Color (Solo como referencia rápida) */}
-            <button 
-              type="button"
-              onClick={() => window.open(`https://wa.me/${whatsappMartha.replace(/\D/g,'')}?text=Hola! Quiero presupuesto de color`)}
-              className="w-full bg-green-500 text-white p-3 rounded-lg flex items-center justify-center gap-2 font-bold text-sm shadow-sm"
-            >
-              <MessageCircle className="w-5 h-5" /> Solicitar Presupuesto de Color
-            </button>
-
-            {/* Fecha y Hora */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase">Fecha de la Cita</label>
-                <input type="date" required className="w-full p-3 bg-gray-50 rounded-lg border focus:ring-2 focus:ring-pink-200" onChange={e => setFormData({...formData, date: e.target.value})} />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 uppercase">Hora Disponible</label>
-                <input type="time" required className="w-full p-3 bg-gray-50 rounded-lg border focus:ring-2 focus:ring-pink-200" onChange={e => setFormData({...formData, time: e.target.value})} />
-              </div>
+          {/* BOTÓN VERDE SÓLO SI ES CATEGORÍA CABELLO */}
+          {catParam === 'CABELLO' && (
+            <div className="mb-10 p-6 bg-green-50 rounded-[32px] border border-green-100 text-center space-y-4">
+              <p className="text-[10px] font-black text-green-700 uppercase tracking-widest">¿Buscas un cambio de color?</p>
+              <button 
+                onClick={() => window.open('https://wa.me/584121663968?text=Hola Martha! Quiero presupuesto de color ✨')}
+                className="w-full bg-[#2ecc71] text-white py-4 rounded-2xl flex items-center justify-center gap-3 font-bold text-xs shadow-md shadow-green-200 uppercase tracking-widest active:scale-95 transition-all"
+              >
+                <MessageCircle className="w-5 h-5 fill-white" /> Presupuesto de Color
+              </button>
             </div>
+          )}
 
-            {/* Identificación del Cliente (Igual a la imagen) */}
-            <div className="space-y-4 pt-4 border-t">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input required placeholder="Tu Nombre Completo" className="p-3 bg-gray-50 rounded-lg border outline-none" onChange={e => setFormData({...formData, fullName: e.target.value})} />
-                <input required placeholder="Teléfono" className="p-3 bg-gray-50 rounded-lg border outline-none" onChange={e => setFormData({...formData, phone: e.target.value})} />
+          {/* LISTA DE SERVICIOS */}
+          <div className="space-y-4">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-4">Selecciona un servicio</p>
+            {servicios.map(s => (
+              <div 
+                key={s.id} 
+                onClick={() => setServicioSeleccionado(s)}
+                className={`p-6 rounded-[28px] border-2 transition-all cursor-pointer flex justify-between items-center ${servicioSeleccionado?.id === s.id ? 'border-[#d81b60] bg-pink-50/30' : 'border-gray-50 bg-gray-50/50 hover:border-pink-100'}`}
+              >
+                <div>
+                  <h4 className="font-bold text-sm uppercase">{s.name}</h4>
+                  <span className="text-[10px] text-gray-400 font-bold flex items-center gap-1 mt-1"><Clock className="w-3 h-3"/> {s.duration_minutes} min</span>
+                </div>
+                <span className="text-xl font-black text-gray-900">${s.price}</span>
               </div>
-              <input placeholder="Correo Electrónico (Opcional)" className="w-full p-3 bg-gray-50 rounded-lg border outline-none" onChange={e => setFormData({...formData, email: e.target.value})} />
-              <textarea placeholder="Notas adicionales (Opcional)" className="w-full p-3 bg-gray-50 rounded-lg border outline-none h-24" onChange={e => setFormData({...formData, notes: e.target.value})} />
-            </div>
+            ))}
+          </div>
 
-            <button 
-              disabled={loading}
-              className="w-full bg-[#d81b60] text-white font-bold py-4 rounded-xl shadow-lg hover:bg-[#b0164e] transition-colors uppercase text-sm tracking-widest"
-            >
-              {loading ? 'Procesando...' : 'Confirmar Reserva'}
-            </button>
-          </form>
+          {/* PANEL DE DATOS (image_be0a9f.jpg) */}
+          {servicioSeleccionado && (
+            <form onSubmit={handleConfirmar} className="mt-12 pt-10 border-t border-gray-100 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+              <div className="grid grid-cols-2 gap-4">
+                <input type="date" required className="p-4 bg-gray-50 rounded-2xl border-none text-sm outline-none" onChange={e => setFormData({...formData, date: e.target.value})} />
+                <input type="time" required className="p-4 bg-gray-50 rounded-2xl border-none text-sm outline-none" onChange={e => setFormData({...formData, time: e.target.value})} />
+              </div>
+              <input required placeholder="Nombre Completo" className="w-full p-4 bg-gray-50 rounded-2xl border-none text-sm outline-none" onChange={e => setFormData({...formData, fullName: e.target.value})} />
+              <input required type="tel" placeholder="WhatsApp (Ej: +58412...)" className="w-full p-4 bg-gray-50 rounded-2xl border-none text-sm outline-none" onChange={e => setFormData({...formData, phone: e.target.value})} />
+              
+              <button className="w-full bg-[#d81b60] text-white font-black py-5 rounded-[24px] shadow-lg shadow-pink-100 uppercase text-xs tracking-[0.3em] active:scale-95 transition-all mt-4">
+                Confirmar Mi Cita ✨
+              </button>
+            </form>
+          )}
         </div>
       </main>
     </div>

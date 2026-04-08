@@ -1,104 +1,111 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Scissors, Wand2, Star, Sparkle, LogIn } from 'lucide-react';
+import { Heart, Calendar, LogIn, UserPlus, Download } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const [servicios, setServicios] = useState([]);
-  const [showAuth, setShowAuth] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    async function cargar() {
-      const { data } = await supabase.from('services').select('*');
-      setServicios(data || []);
+  // Lógica para simular la instalación de la App
+  const handleInstallApp = () => {
+    alert("¡Iniciando la descarga de Martha Cute Studio App! Revisa tus notificaciones.");
+  };
+
+  const handleAuth = async (type) => {
+    setLoading(true);
+    const { error } = type === 'login' 
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ 
+          email, 
+          password,
+          options: {
+            data: {
+              full_name: fullName,
+              phone: phone,
+              role: 'client'
+            }
+          }
+        });
+    
+    if (error) alert(error.message);
+    else {
+      alert(type === 'login' ? "¡Bienvenida de vuelta!" : "¡Cuenta creada! Revisa tu email.");
+      navigate('/servicios'); // Lo mandamos a servicios después de loguearse
     }
-    cargar();
-  }, []);
-
-  const handleAuth = async (e) => {
-    e.preventDefault();
-    try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
-      navigate('/admin');
-    } catch (err) { alert(err.message); }
+    setLoading(false);
   };
-
-  const iconMap = { 
-    'CABELLO': Scissors, 'CEJAS': Sparkle, 'PESTAÑAS': Wand2, 'UÑAS': Star, 'DEFAULT': Sparkles 
-  };
-
-  const categoriasUnicas = [...new Set(servicios.map(s => s.category?.toUpperCase() || 'OTROS'))];
 
   return (
-    <div className="min-h-screen bg-[#fdfafb] pb-8 px-4 font-sans">
+    <div className="min-h-screen bg-[#fdfafb] pb-24 px-4 font-sans text-gray-900">
       <main className="max-w-md mx-auto pt-4 space-y-6">
         
-        {/* BOTÓN DE ENTRAR RECUPERADO (image_be7add.jpg) */}
-        <div className="flex justify-end">
+        {/* BOTÓN DE INSTALAR APP */}
+        <div className="flex justify-center mb-6">
           <button 
-            onClick={() => setShowAuth(!showAuth)} 
-            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#d81b60] transition-colors"
+            onClick={handleInstallApp}
+            className="flex items-center gap-2 bg-[#d81b60]/10 text-[#d81b60] font-bold px-6 py-2 rounded-full text-[10px] uppercase tracking-widest active:scale-95 transition-all border border-pink-100 shadow-sm"
           >
-            <LogIn className="w-4 h-4" /> Entrar
+            <Download className="w-4 h-4" /> Instalar App
           </button>
         </div>
 
-        {/* CABEZAL GRANDE Y ELEGANTE (image_be6fdf.jpg) */}
-        <section className="bg-white rounded-[35px] p-8 text-center shadow-sm border border-pink-50/50">
-          <div className="bg-[#d81b60] w-16 h-16 rounded-[22px] flex items-center justify-center mx-auto mb-5 rotate-3 shadow-lg shadow-pink-100">
-            <Sparkles className="text-white w-8 h-8" />
+        {/* CABEZAL CON BANNER Y CORAZÓN TRASLÚCIDO */}
+        <header className="relative bg-white rounded-[32px] p-10 text-center shadow-lg shadow-pink-100/50 border border-pink-50 overflow-hidden">
+          {/* El CORAZÓN Traslúcido detrás */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-5 rotate-[-15deg]">
+            <Heart className="w-64 h-64 text-[#d81b60]" />
           </div>
-          <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-1">Martha Cute Studio</h1>
-          <p className="text-gray-400 text-xs font-medium mb-8">Reserva tu cita o pide presupuesto de color</p>
+
+          {/* El Banner Rosa (Pill shape) con el nombre */}
+          <div className="relative z-10 inline-flex items-center gap-3 bg-[#d81b60] text-white px-8 py-3 rounded-full shadow-md shadow-pink-200">
+            <Heart className="w-5 h-5 text-white" />
+            <h1 className="text-xl font-black uppercase tracking-tighter">Martha Cute Studio</h1>
+          </div>
           
-          <button 
-            onClick={() => navigate('/reservar')} 
-            className="w-full bg-[#d81b60] text-white font-bold py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-pink-200 active:scale-95 transition-all"
-          >
-            Reservar Cita
-          </button>
-        </section>
+          <p className="relative z-10 text-gray-400 text-[10px] font-bold uppercase tracking-widest mt-4">Realzamos tu belleza natural</p>
+        </header>
 
-        {/* LOGIN FORM (Aparece al darle a Entrar) */}
-        {showAuth && (
-          <div className="bg-white rounded-[28px] p-6 shadow-md border border-pink-50 animate-in fade-in zoom-in duration-200">
-            <form onSubmit={handleAuth} className="space-y-3">
-              <input className="w-full px-4 py-3 bg-gray-50 rounded-xl text-xs outline-none" type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} />
-              <input className="w-full px-4 py-3 bg-gray-50 rounded-xl text-xs outline-none" type="password" placeholder="Clave" onChange={e => setPassword(e.target.value)} />
-              <button className="w-full bg-gray-900 text-white font-bold py-3 rounded-xl text-[10px] uppercase tracking-widest">Acceder</button>
-            </form>
+        {/* BOTÓN PRINCIPAL DE AGENDAR CITA */}
+        <button 
+          onClick={() => navigate('/servicios')} 
+          className="w-full bg-[#d81b60] text-white font-black py-5 rounded-[24px] text-[12px] uppercase tracking-[0.2em] shadow-xl shadow-pink-200 active:scale-95 transition-all flex items-center justify-center gap-3 border-4 border-white"
+        >
+          <Calendar className="w-5 h-5" /> Agendar Cita
+        </button>
+
+        {/* FORMULARIO DE INICIO DE SESIÓN */}
+        <div className="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-2 mb-6 text-[#d81b60]">
+            <LogIn className="w-4 h-4" />
+            <h2 className="text-[11px] font-black uppercase tracking-widest">Ya tengo cuenta</h2>
           </div>
-        )}
-
-        {/* BANNERS DE CATEGORÍAS (image.png con corrección de tamaño) */}
-        <div className="grid grid-cols-2 gap-4">
-          {categoriasUnicas.map(cat => {
-            const servicioConImagen = servicios.find(s => s.category?.toUpperCase() === cat && s.image_url);
-            const bgImage = servicioConImagen?.image_url || 'https://via.placeholder.com/300';
-            const Icono = iconMap[cat] || iconMap['DEFAULT'];
-
-            return (
-              <div 
-                key={cat} 
-                onClick={() => navigate(`/reservar?categoria=${cat}`)}
-                className="relative h-36 rounded-[28px] overflow-hidden shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-all group"
-              >
-                <img src={bgImage} alt={cat} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-3 text-center">
-                  <div className="bg-white/20 p-2 rounded-xl mb-2 backdrop-blur-md border border-white/10">
-                    <Icono className="w-5 h-5 text-white" />
-                  </div>
-                  <h4 className="font-black text-white text-[11px] uppercase tracking-wider">{cat}</h4>
-                  <span className="text-[9px] font-bold text-pink-200 uppercase mt-1 opacity-90">Ver menú</span>
-                </div>
-              </div>
-            );
-          })}
+          <div className="space-y-3">
+            <input className="w-full px-5 py-4 bg-gray-50 rounded-2xl text-[11px] outline-none border-none focus:ring-2 ring-pink-100 transition-all" type="email" placeholder="Correo electrónico" onChange={e => setEmail(e.target.value)} />
+            <input className="w-full px-5 py-4 bg-gray-50 rounded-2xl text-[11px] outline-none border-none focus:ring-2 ring-pink-100 transition-all" type="password" placeholder="Contraseña" onChange={e => setPassword(e.target.value)} />
+            <button onClick={() => handleAuth('login')} disabled={loading} className="w-full bg-gray-900 text-white font-bold py-4 rounded-2xl text-[10px] uppercase tracking-widest mt-2 active:bg-black">Entrar</button>
+          </div>
         </div>
+
+        {/* FORMULARIO DE REGISTRO (Completo) */}
+        <div className="bg-[#fff5f8] rounded-[32px] p-6 border border-dashed border-pink-200">
+          <div className="flex items-center gap-2 mb-6 text-gray-500">
+            <UserPlus className="w-4 h-4" />
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-pink-700/60">¿Eres nueva? Crea tu cuenta</h2>
+          </div>
+          <div className="space-y-3">
+            <input className="w-full px-5 py-4 bg-white rounded-2xl text-[11px] outline-none border border-pink-50" type="text" placeholder="Nombre completo" onChange={e => setFullName(e.target.value)} />
+            <input className="w-full px-5 py-4 bg-white rounded-2xl text-[11px] outline-none border border-pink-50" type="tel" placeholder="Teléfono" onChange={e => setPhone(e.target.value)} />
+            <input className="w-full px-5 py-4 bg-white rounded-2xl text-[11px] outline-none border border-pink-50" type="email" placeholder="Correo electrónico" onChange={e => setEmail(e.target.value)} />
+            <input className="w-full px-5 py-4 bg-white rounded-2xl text-[11px] outline-none border border-pink-50" type="password" placeholder="Crea una contraseña" onChange={e => setPassword(e.target.value)} />
+            <button onClick={() => handleAuth('signup')} className="w-full bg-white text-[#d81b60] border border-[#d81b60] font-bold py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-sm active:bg-pink-50">Registrarme ✨</button>
+          </div>
+        </div>
+
       </main>
     </div>
   );

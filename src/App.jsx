@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from './supabase';
 import LoginPage from './pages/LoginPage';
+import Reservar from './pages/Reservar'; // IMPORTANTE: Agrega esta línea
 import AdminDashboard from './pages/AdminDashboard';
 
 export default function App() {
@@ -28,16 +29,19 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ahora la raíz es LoginPage, que tiene la bienvenida y los servicios */}
+        {/* Página principal con servicios y botones de acceso */}
         <Route path="/" element={<LoginPage />} />
         
-        {/* Si ya hay sesión y entran a /login, los mandamos al admin directamente */}
+        {/* ESTA ES LA QUE FALTABA: La pantalla donde eligen fecha y ponen sus datos */}
+        <Route path="/reservar" element={<Reservar />} />
+        
+        {/* Manejo del Login */}
         <Route path="/login" element={!session ? <LoginPage /> : <Navigate to="/admin" />} />
         
-        {/* El panel de administración protegido */}
+        {/* Panel de administración protegido */}
         <Route path="/admin" element={session ? <AdminDashboard /> : <Navigate to="/login" />} />
         
-        {/* Cualquier otra ruta loca se regresa al inicio */}
+        {/* Si escriben cualquier cosa vieja, al inicio de una */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>

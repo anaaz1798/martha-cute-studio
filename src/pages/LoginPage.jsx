@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Calendar } from 'lucide-react';
+import { Sparkles, Scissors, Wand2, Star, Sparkle, LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [servicios, setServicios] = useState([]);
+  const [showAuth, setShowAuth] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     async function cargar() {
@@ -15,47 +18,82 @@ export default function LoginPage() {
     cargar();
   }, []);
 
-  // Agrupamos servicios para sacar las categorías
+  const handleAuth = async (e) => {
+    e.preventDefault();
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      navigate('/admin');
+    } catch (err) { alert(err.message); }
+  };
+
+  const iconMap = { 
+    'CABELLO': Scissors, 'CEJAS': Sparkle, 'PESTAÑAS': Wand2, 'UÑAS': Star, 'DEFAULT': Sparkles 
+  };
+
   const categoriasUnicas = [...new Set(servicios.map(s => s.category?.toUpperCase() || 'OTROS'))];
 
   return (
-    <div className="min-h-screen bg-[#fdfafb] pb-6 px-4 font-sans">
-      <main className="max-w-md mx-auto pt-4 space-y-4">
+    <div className="min-h-screen bg-[#fdfafb] pb-8 px-4 font-sans">
+      <main className="max-w-md mx-auto pt-4 space-y-6">
         
-        {/* HEADER COMPACTO */}
-        <section className="bg-white rounded-[28px] p-4 text-center shadow-sm border border-pink-50/50">
-          <div className="bg-[#d81b60] w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2 shadow-md">
-            <Sparkles className="text-white w-5 h-5" />
+        {/* BOTÓN DE ENTRAR RECUPERADO (image_be7add.jpg) */}
+        <div className="flex justify-end">
+          <button 
+            onClick={() => setShowAuth(!showAuth)} 
+            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-[#d81b60] transition-colors"
+          >
+            <LogIn className="w-4 h-4" /> Entrar
+          </button>
+        </div>
+
+        {/* CABEZAL GRANDE Y ELEGANTE (image_be6fdf.jpg) */}
+        <section className="bg-white rounded-[35px] p-8 text-center shadow-sm border border-pink-50/50">
+          <div className="bg-[#d81b60] w-16 h-16 rounded-[22px] flex items-center justify-center mx-auto mb-5 rotate-3 shadow-lg shadow-pink-100">
+            <Sparkles className="text-white w-8 h-8" />
           </div>
-          <h1 className="text-lg font-black text-gray-900 uppercase">Martha Cute Studio</h1>
+          <h1 className="text-2xl font-black text-gray-900 uppercase tracking-tighter mb-1">Martha Cute Studio</h1>
+          <p className="text-gray-400 text-xs font-medium mb-8">Reserva tu cita o pide presupuesto de color</p>
+          
           <button 
             onClick={() => navigate('/reservar')} 
-            className="mt-3 w-full bg-[#d81b60] text-white font-bold py-3 rounded-xl text-[10px] uppercase tracking-widest active:scale-95 transition-all shadow-md"
+            className="w-full bg-[#d81b60] text-white font-bold py-4 rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-pink-200 active:scale-95 transition-all"
           >
             Reservar Cita
           </button>
         </section>
 
-        {/* BANNERS CON FOTOS CARGADAS */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* LOGIN FORM (Aparece al darle a Entrar) */}
+        {showAuth && (
+          <div className="bg-white rounded-[28px] p-6 shadow-md border border-pink-50 animate-in fade-in zoom-in duration-200">
+            <form onSubmit={handleAuth} className="space-y-3">
+              <input className="w-full px-4 py-3 bg-gray-50 rounded-xl text-xs outline-none" type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} />
+              <input className="w-full px-4 py-3 bg-gray-50 rounded-xl text-xs outline-none" type="password" placeholder="Clave" onChange={e => setPassword(e.target.value)} />
+              <button className="w-full bg-gray-900 text-white font-bold py-3 rounded-xl text-[10px] uppercase tracking-widest">Acceder</button>
+            </form>
+          </div>
+        )}
+
+        {/* BANNERS DE CATEGORÍAS (image.png con corrección de tamaño) */}
+        <div className="grid grid-cols-2 gap-4">
           {categoriasUnicas.map(cat => {
-            // Buscamos si algún servicio de esta categoría tiene imagen
             const servicioConImagen = servicios.find(s => s.category?.toUpperCase() === cat && s.image_url);
             const bgImage = servicioConImagen?.image_url || 'https://via.placeholder.com/300';
+            const Icono = iconMap[cat] || iconMap['DEFAULT'];
 
             return (
               <div 
                 key={cat} 
                 onClick={() => navigate(`/reservar?categoria=${cat}`)}
-                className="relative h-32 rounded-[20px] overflow-hidden shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-all group"
+                className="relative h-36 rounded-[28px] overflow-hidden shadow-sm border border-gray-100 cursor-pointer active:scale-95 transition-all group"
               >
-                {/* Imagen de Fondo */}
-                <img src={bgImage} alt={cat} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                
-                {/* Capa oscura para que se lea el texto */}
-                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-2">
-                  <h4 className="font-black text-white text-[10px] uppercase tracking-tighter drop-shadow-md">{cat}</h4>
-                  <span className="text-[8px] font-bold text-pink-200 uppercase mt-1">Ver menú</span>
+                <img src={bgImage} alt={cat} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center p-3 text-center">
+                  <div className="bg-white/20 p-2 rounded-xl mb-2 backdrop-blur-md border border-white/10">
+                    <Icono className="w-5 h-5 text-white" />
+                  </div>
+                  <h4 className="font-black text-white text-[11px] uppercase tracking-wider">{cat}</h4>
+                  <span className="text-[9px] font-bold text-pink-200 uppercase mt-1 opacity-90">Ver menú</span>
                 </div>
               </div>
             );

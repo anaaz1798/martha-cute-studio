@@ -40,7 +40,7 @@ export default function ServicesPage() {
 
   const handlePresupuesto = (servicio) => {
     const mensaje = `Hola! Me gustaría pedir un presupuesto para: ${servicio}`;
-    window.open(`https://wa.me/584121663698?text=${encodeURIComponent(mensaje)}`, '_blank');
+    window.open(`https://wa.me/584121663968?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
   return (

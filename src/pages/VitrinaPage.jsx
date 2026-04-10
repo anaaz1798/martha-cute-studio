@@ -13,10 +13,12 @@ export default function VitrinaPage() {
       </nav>
 
       <main className="max-w-md mx-auto p-4">
-        <p className="cute-title">Productos Disponibles</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-4 text-center">
+          Productos Disponibles
+        </p>
         <div className="grid grid-cols-2 gap-3">
           {productos.map(p => (
-            <div key={p.id} className="cute-card flex flex-col items-center">
+            <div key={p.id} className="bg-white rounded-[24px] p-4 shadow-sm border border-pink-50/50 flex flex-col items-center">
               <div className="w-full aspect-square bg-pink-50 rounded-2xl mb-3 overflow-hidden">
                 <img src={p.img} alt={p.name} className="w-full h-full object-cover" />
               </div>
@@ -33,4 +35,3 @@ export default function VitrinaPage() {
     </div>
   );
 }
-};

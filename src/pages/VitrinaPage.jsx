@@ -1,32 +1,24 @@
 import Navbar from '../components/Navbar';
 
 export default function VitrinaPage() {
-  const productos = [
-    { id: 1, name: 'Aceite de Argán', price: 25, img: 'https://via.placeholder.com/150' },
-    { id: 2, name: 'Pestañas VIP', price: 15, img: 'https://via.placeholder.com/150' }
-  ];
-
   return (
-    <div className="min-h-screen bg-[#fdfafb] pb-24 font-sans text-gray-800">
-      <nav className="bg-[#fb7185] text-white p-4 text-center sticky top-0 z-50 shadow-md">
-        <span className="font-black uppercase text-[10px] tracking-[0.3em]">Nuestra Vitrina</span>
+    <div className="min-h-screen bg-[#fffafa] pb-24 px-4 font-sans text-gray-800">
+      {/* Header con el rosa del botón de agendar */}
+      <nav className="bg-[#ec4899] text-white p-4 text-center sticky top-0 z-50 rounded-b-[30px] shadow-md">
+        <span className="text-[11px] font-black uppercase tracking-[0.2em]">Nuestra Vitrina</span>
       </nav>
 
-      <main className="max-w-md mx-auto p-4">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-6 text-center text-rose-400/50">Productos Disponibles</p>
-        <div className="grid grid-cols-2 gap-4">
-          {productos.map(p => (
-            <div key={p.id} className="cute-card flex flex-col items-center">
-              <div className="w-full aspect-square bg-rose-50/50 rounded-2xl mb-3 overflow-hidden">
-                <img src={p.img} alt={p.name} className="w-full h-full object-cover" />
-              </div>
-              <h3 className="font-bold text-[9px] uppercase text-gray-700 text-center leading-tight">{p.name}</h3>
-              <p className="text-[11px] font-black text-[#fb7185] mt-1">${p.price}</p>
-              <button className="mt-3 w-full bg-[#2ecc71] text-white py-2 rounded-xl text-[8px] font-black uppercase tracking-widest shadow-sm">
-                Lo quiero
-              </button>
-            </div>
-          ))}
+      <main className="max-w-md mx-auto pt-6 space-y-4">
+        <div className="cute-card">
+          <div className="p-5 flex flex-col items-center">
+            <div className="w-24 h-24 bg-pink-50 rounded-full mb-4"></div>
+            <h3 className="text-[#f472b6] text-[11px] font-black uppercase tracking-widest">Aceite de Argán</h3>
+            <p className="text-gray-400 text-[10px] font-bold mt-1">$25.00</p>
+            {/* Botón igualito al de Agendar Cita */}
+            <button className="mt-4 bg-[#ec4899] text-white px-8 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-pink-100 active:scale-95">
+              Lo quiero
+            </button>
+          </div>
         </div>
       </main>
       <Navbar />

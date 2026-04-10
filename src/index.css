@@ -3,9 +3,10 @@
 @tailwind utilities;
 
 body {
-  @apply bg-[#fdfafb] text-gray-800 antialiased;
+  @apply bg-[#fffafa] text-gray-800 antialiased;
 }
 
+/* Las tarjetas blancas con borde rosadito suave como tu login */
 .cute-card {
-  @apply bg-white rounded-[24px] p-6 shadow-sm border border-rose-50/50 mb-4;
+  @apply bg-white rounded-[32px] border-2 border-[#fbcfe8] overflow-hidden shadow-sm mb-4;
 }

@@ -2,7 +2,7 @@ import Navbar from '../components/Navbar';
 
 export default function EventsPage() {
   return (
-    <div className="min-h-screen bg-[#fdfafb] pb-24 font-sans text-gray-800">
+    <div className="min-h-screen bg-cute pb-24 font-sans text-gray-800">
       <nav className="bg-[#d81b60] text-white p-4 text-center sticky top-0 z-50">
         <span className="font-black uppercase text-[10px] tracking-[0.3em]">Próximos Eventos</span>
       </nav>

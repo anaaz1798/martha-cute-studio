@@ -7,12 +7,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: '#d81b60',
-          light: '#fce4ec',
-          dark: '#ad1457',
-        }
-      }
+        cute: '#d81b60', // El rosado del login
+      },
     },
   },
   plugins: [],

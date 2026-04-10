@@ -1,29 +1,31 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import Reservar from './pages/Reservar';
 import ServicesPage from './pages/ServicesPage';
-import EventosPage from './pages/EventosPage';
+import EventsPage from './pages/EventsPage'; // Corregido: antes decía EventosPage
 import VitrinaPage from './pages/VitrinaPage';
 import Navbar from './components/Navbar';
 
 function App() {
   return (
     <Router>
-      <div className="pb-20"> {/* Espacio para que el menú no tape nada */}
+      <div className="pb-20">
         <Routes>
-          {/* Esta es la pantalla de inicio con el botón rosa y banners */}
+          {/* Inicio con el botón rosa y banners */}
           <Route path="/" element={<LoginPage />} />
           
-          {/* Esta es la nueva página compacta que creaste */}
+          {/* Página compacta de reservas */}
           <Route path="/reservar" element={<Reservar />} />
           
-          {/* Otras rutas existentes */}
+          {/* Otras rutas corregidas según tus archivos */}
           <Route path="/servicios" element={<ServicesPage />} />
-          <Route path="/eventos" element={<EventosPage />} />
+          <Route path="/eventos" element={<EventsPage />} />
           <Route path="/vitrina" element={<VitrinaPage />} />
+
+          {/* Por si acaso escriben cualquier cosa en la URL */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         
-        {/* El Navbar se mantiene abajo siempre */}
         <Navbar />
       </div>
     </Router>

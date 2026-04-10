@@ -3,17 +3,15 @@
 @tailwind utilities;
 
 body {
-  /* Fondo blanco cremoso para toda la app */
   @apply bg-[#fdfafb] text-gray-800 antialiased;
-  font-family: 'Inter', sans-serif; /* O la que estés usando */
 }
 
-/* Tarjeta uniformemente redondeada y con fondo blanco */
+/* Esta clase hace que cualquier caja se vea como la del login */
 .cute-card {
-  @apply bg-white rounded-[24px] p-4 shadow-sm border border-pink-50/50 transition-all active:scale-[0.98];
+  @apply bg-white rounded-[24px] p-6 shadow-sm border border-pink-50/50 mb-4;
 }
 
-/* Título minimalista en mayúsculas y en negrita */
+/* Esta clase hace que todos los títulos se vean finitos y elegantes */
 .cute-title {
-  @apply text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-4 text-center;
+  @apply text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 text-center mb-6;
 }

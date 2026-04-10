@@ -8,7 +8,7 @@ export default function VitrinaPage() {
 
   return (
     <div className="min-h-screen bg-[#fffafa] pb-24 font-sans text-gray-800">
-      <nav className="bg-[#d81b60] text-white p-4 text-center sticky top-0 z-50 shadow-md">
+      <nav className="bg-[#fffafa] text-white p-4 text-center sticky top-0 z-50 shadow-md">
         <span className="font-black uppercase text-[10px] tracking-[0.3em]">Nuestra Vitrina</span>
       </nav>
 

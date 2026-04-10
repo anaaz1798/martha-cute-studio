@@ -1,66 +1,36 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../supabase';
+import Navbar from '../components/Navbar';
 
 export default function VitrinaPage() {
-  const [productos, setProductos] = useState([]);
-  const WHATSAPP_LINK = "https://wa.link/nkdmm8"; // Tu link de siempre
-
-  useEffect(() => {
-    async function cargarProductos() {
-      const { data } = await supabase.from('products').select('*').eq('is_active', true);
-      if (data) setProductos(data);
-    }
-    cargarProductos();
-  }, []);
-
-  const consultarProducto = (nombre) => {
-    const mensaje = encodeURIComponent(`¡Hola! Estoy interesada en el producto: ${nombre} ✨`);
-    window.open(`${WHATSAPP_LINK}?text=${mensaje}`, '_blank');
-  };
+  const productos = [
+    { id: 1, name: 'Aceite de Argán', price: 25, img: 'https://via.placeholder.com/150' },
+    { id: 2, name: 'Pestañas VIP', price: 15, img: 'https://via.placeholder.com/150' }
+  ];
 
   return (
-    <div style={{ maxWidth: '800px', margin: 'auto', padding: '20px' }}>
-      <h1 style={{ textAlign: 'center', color: '#d15690' }}>Nuestra Vitrina</h1>
-      <p style={{ textAlign: 'center', color: '#666', marginBottom: '30px' }}>Productos exclusivos para tu cuidado</p>
+    <div className="min-h-screen bg-[#fdfafb] pb-24 font-sans">
+      <nav className="bg-[#d81b60] text-white p-4 text-center sticky top-0 z-50 shadow-md">
+        <span className="font-black uppercase text-[10px] tracking-[0.3em]">Nuestra Vitrina</span>
+      </nav>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-        {productos.map((p) => (
-          <div key={p.id} style={cardProducto}>
-            <img src={p.image_url} alt={p.name} style={imgStyle} />
-            <div style={{ padding: '10px' }}>
-              <h3 style={{ fontSize: '16px', margin: '5px 0' }}>{p.name}</h3>
-              <p style={{ fontSize: '12px', color: '#888', height: '30px', overflow: 'hidden' }}>{p.description}</p>
-              <div style={{ fontWeight: 'bold', color: '#d15690', margin: '10px 0' }}>${p.price}</div>
-              <button 
-                onClick={() => consultarProducto(p.name)}
-                style={btnWhatsApp}
-              >
-                Me interesa 📲
+      <main className="max-w-md mx-auto p-4">
+        <p className="cute-title">Productos Disponibles</p>
+        <div className="grid grid-cols-2 gap-3">
+          {productos.map(p => (
+            <div key={p.id} className="cute-card flex flex-col items-center">
+              <div className="w-full aspect-square bg-pink-50 rounded-2xl mb-3 overflow-hidden">
+                <img src={p.img} alt={p.name} className="w-full h-full object-cover" />
+              </div>
+              <h3 className="font-bold text-[9px] uppercase text-gray-700 text-center leading-tight">{p.name}</h3>
+              <p className="text-[11px] font-black text-[#d81b60] mt-1">${p.price}</p>
+              <button className="mt-3 w-full bg-[#2ecc71] text-white py-2 rounded-xl text-[8px] font-black uppercase tracking-widest shadow-sm">
+                Lo quiero
               </button>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </main>
+      <Navbar />
     </div>
   );
 }
-
-// --- ESTILOS ---
-const cardProducto = {
-  backgroundColor: '#fff',
-  borderRadius: '15px',
-  overflow: 'hidden',
-  border: '1px solid #eee',
-  boxShadow: '0 4px 6px rgba(0,0,0,0.05)'
-};
-const imgStyle = { width: '100%', height: '150px', objectFit: 'cover' };
-const btnWhatsApp = {
-  width: '100%',
-  padding: '10px',
-  backgroundColor: '#25D366',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '8px',
-  fontWeight: 'bold',
-  cursor: 'pointer'
 };

@@ -2,16 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* UNIFICACIÓN DE COLOR ROSA #d81b60 */
+:root {
+  --rosa-cute: #d81b60;
+}
+
 body {
   @apply bg-[#fdfafb] text-gray-800 antialiased;
 }
 
-/* Esta clase hace que cualquier caja se vea como la del login */
+/* NAVBAR, HEADERS Y BOTONES: TODO CON EL MISMO ROSA */
+.bg-cute {
+  background-color: var(--rosa-cute) !important;
+}
+
+.text-cute {
+  color: var(--rosa-cute) !important;
+}
+
+.border-cute {
+  border-color: var(--rosa-cute) !important;
+}
+
+/* LA TARJETA DEL LOGIN (Repetida para todo) */
 .cute-card {
   @apply bg-white rounded-[24px] p-6 shadow-sm border border-pink-50/50 mb-4;
 }
 
-/* Esta clase hace que todos los títulos se vean finitos y elegantes */
-.cute-title {
-  @apply text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 text-center mb-6;
+/* BOTÓN PRINCIPAL */
+.btn-cute {
+  background-color: var(--rosa-cute);
+  @apply text-white font-black py-3 px-6 rounded-xl shadow-md text-[9px] uppercase tracking-[0.2em] transition-all active:scale-95;
 }

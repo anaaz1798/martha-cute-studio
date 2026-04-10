@@ -1,103 +1,67 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import { ChevronDown, ChevronUp, Scissors, Sparkles, Star } from 'lucide-react';
+import { ChevronLeft, Clock, Sparkles, Star, Calendar } from 'lucide-react';
 
 export default function ServicesPage() {
   const navigate = useNavigate();
-  const [openCategory, setOpenCategory] = useState(null);
 
-  const categorias = [
-    {
-      id: 'pestanas',
-      nombre: 'Pestañas & Cejas',
-      icono: <Sparkles className="w-5 h-5" />,
-      servicios: [
-        { nombre: 'Lifting de Pestañas', precio: '35.00', tipo: 'fijo' },
-        { nombre: 'Diseño de Cejas + Henna', precio: '20.00', tipo: 'fijo' }
-      ]
-    },
-    {
-      id: 'cabello',
-      nombre: 'Cuidado Capilar',
-      icono: <Scissors className="w-5 h-5" />,
-      servicios: [
-        { nombre: 'Color Global / Balayage', precio: 'Variable', tipo: 'presupuesto' },
-        { nombre: 'Hidratación Profunda', precio: '25.00', tipo: 'fijo' },
-        { nombre: 'Corte de Puntas', precio: '15.00', tipo: 'fijo' }
-      ]
-    },
-    {
-      id: 'unas',
-      nombre: 'Manicura & Pedicura',
-      icono: <Star className="w-5 h-5" />,
-      servicios: [
-        { nombre: 'Semiesmaltado', precio: '18.00', tipo: 'fijo' },
-        { nombre: 'Pedicura Spa', precio: '30.00', tipo: 'fijo' }
-      ]
-    }
+  const servicios = [
+    { id: 1, nombre: 'Lifting de Pestañas', precio: '$45', tiempo: '45 min', icon: '✨' },
+    { id: 2, nombre: 'Diseño de Cejas', precio: '$25', tiempo: '30 min', icon: '🖋️' },
+    { id: 3, nombre: 'Limpieza Facial', precio: '$60', tiempo: '60 min', icon: '🧖‍♀️' },
   ];
 
-  const handlePresupuesto = (servicio) => {
-    const mensaje = `Hola! Me gustaría pedir un presupuesto para: ${servicio}`;
-    window.open(`https://wa.me/584121663968?text=${encodeURIComponent(mensaje)}`, '_blank');
-  };
-
   return (
-    <div className="min-h-screen bg-[#fffafa] pb-32 font-sans text-gray-800">
-      <nav className="bg-[#ec4899] text-white p-8 text-center sticky top-0 z-50 rounded-b-[40px] shadow-md">
-        <span className="font-black uppercase text-[12px] tracking-[0.4em]">Servicios</span>
+    <div className="min-h-screen bg-[#fffafa] pb-20 font-sans">
+      {/* Header */}
+      <nav className="bg-white p-6 flex items-center gap-4 sticky top-0 z-50 border-b border-pink-50">
+        <button onClick={() => navigate('/')} className="p-2 text-gray-400">
+          <ChevronLeft size={24} />
+        </button>
+        <h1 className="text-[14px] font-black uppercase tracking-widest text-gray-700">Reservar Cita</h1>
       </nav>
 
-      <main className="max-w-md mx-auto p-8 pt-12 space-y-8">
-        {categorias.map((cat) => (
-          <div key={cat.id} className="bg-white rounded-[40px] shadow-sm border-2 border-[#fbcfe8] overflow-hidden">
-            <button 
-              onClick={() => setOpenCategory(openCategory === cat.id ? null : cat.id)}
-              className="w-full p-10 flex items-center justify-between active:bg-pink-50/20"
-            >
-              <div className="flex items-center gap-5 text-[#ec4899]">
-                {cat.icono}
-                <span className="font-black uppercase text-[13px] tracking-widest">{cat.nombre}</span>
-              </div>
-              {openCategory === cat.id ? <ChevronUp className="text-gray-300" /> : <ChevronDown className="text-gray-300" />}
-            </button>
-
-            {openCategory === cat.id && (
-              <div className="px-10 pb-10 space-y-6 animate-fadeIn">
-                <div className="h-[1px] bg-pink-50 w-full mb-4" />
-                {cat.servicios.map((s, index) => (
-                  <div key={index} className="flex justify-between items-center bg-[#fffafa] p-6 rounded-[25px] border border-pink-50/50">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-black uppercase text-gray-700">{s.nombre}</span>
-                      <span className="text-[14px] font-black text-[#ec4899] mt-1">
-                        {s.tipo === 'presupuesto' ? 'Por evaluar' : `$${s.precio}`}
-                      </span>
-                    </div>
-                    
-                    {s.tipo === 'presupuesto' ? (
-                      <button 
-                        onClick={() => handlePresupuesto(s.nombre)}
-                        className="bg-gray-800 text-white px-5 py-3 rounded-full text-[8px] font-black uppercase tracking-widest shadow-md active:scale-95 transition-all"
-                      >
-                        Presupuesto
-                      </button>
-                    ) : (
-                      <button 
-                        onClick={() => navigate('/reservar')}
-                        className="bg-[#ec4899] text-white px-6 py-3 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg shadow-pink-100 active:scale-95 transition-all"
-                      >
-                        Agendar
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+      <main className="p-6 space-y-6">
+        <div className="bg-[#ec4899] p-8 rounded-[40px] text-white shadow-lg shadow-pink-100 relative overflow-hidden">
+          <div className="relative z-10">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Bienvenida a</p>
+            <h2 className="text-[20px] font-black uppercase leading-tight mt-1">Tu momento <br/> de brillar</h2>
           </div>
-        ))}
+          <Sparkles className="absolute right-[-10px] bottom-[-10px] opacity-20" size={120} />
+        </div>
+
+        <h3 className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-2">Nuestros Servicios</h3>
+
+        <div className="space-y-4">
+          {servicios.map((s) => (
+            <div key={s.id} className="bg-white p-6 rounded-[30px] border-2 border-pink-50 flex items-center justify-between group active:scale-95 transition-all">
+              <div className="flex items-center gap-4">
+                <span className="text-2xl">{s.icon}</span>
+                <div>
+                  <p className="text-[12px] font-black uppercase text-gray-700">{s.nombre}</p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-[#ec4899]">
+                      <Clock size={12} /> {s.tiempo}
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-300">|</span>
+                    <span className="text-[10px] font-bold text-gray-700">{s.precio}</span>
+                  </div>
+                </div>
+              </div>
+              <button className="bg-pink-50 p-3 rounded-full text-[#ec4899]">
+                <Calendar size={18} />
+              </button>
+            </div>
+          ))}
+        </div>
       </main>
-      <Navbar />
+
+      {/* Botón flotante de ayuda */}
+      <div className="fixed bottom-6 right-6">
+        <button className="bg-gray-800 text-white p-4 rounded-full shadow-xl">
+          <Star size={20} />
+        </button>
+      </div>
     </div>
   );
 }

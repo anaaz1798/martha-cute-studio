@@ -2,26 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* DEFINIMOS TU ROSADO FAVORITO */
-:root {
-  --rosa-martha: #f472b6;
-}
-
 body {
   @apply bg-[#fdfafb] text-gray-800 antialiased;
 }
 
-/* El fondo de los headers y botones */
-.bg-martha {
-  background-color: var(--rosa-martha) !important;
-}
-
-/* El color de los textos importantes */
-.text-martha {
-  color: var(--rosa-martha) !important;
-}
-
-/* Las tarjetas blancas como el login */
 .cute-card {
-  @apply bg-white rounded-[24px] p-6 shadow-sm border border-pink-50/50 mb-4;
+  @apply bg-white rounded-[24px] p-6 shadow-sm border border-rose-50/50 mb-4;
 }

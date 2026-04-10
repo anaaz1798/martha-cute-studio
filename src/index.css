@@ -3,16 +3,17 @@
 @tailwind utilities;
 
 body {
+  /* Fondo blanco cremoso para toda la app */
   @apply bg-[#fdfafb] text-gray-800 antialiased;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', sans-serif; /* O la que estés usando */
 }
 
-/* Tarjetas uniformes para servicios, productos y eventos */
+/* Tarjeta uniformemente redondeada y con fondo blanco */
 .cute-card {
   @apply bg-white rounded-[24px] p-4 shadow-sm border border-pink-50/50 transition-all active:scale-[0.98];
 }
 
-/* Títulos minimalistas */
+/* Título minimalista en mayúsculas y en negrita */
 .cute-title {
   @apply text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 mb-4 text-center;
 }

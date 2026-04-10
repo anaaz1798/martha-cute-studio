@@ -1,4 +1,6 @@
 import Navbar from '../components/Navbar';
+// Asegúrate de tener calendar en lucide-react
+import { Calendar } from 'lucide-react';
 
 export default function EventsPage() {
   return (
@@ -9,6 +11,7 @@ export default function EventsPage() {
 
       <main className="max-w-md mx-auto p-4 space-y-4">
         <p className="cute-title">No te lo pierdas</p>
+        
         <div className="cute-card border-l-4 border-l-[#d81b60]">
           <h3 className="font-black text-[11px] uppercase text-gray-800">Workshop de Automaquillaje</h3>
           <p className="text-[9px] text-gray-400 font-bold mt-1 uppercase">Sábado 15 de Mayo - 10:00 AM</p>

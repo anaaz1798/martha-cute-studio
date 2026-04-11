@@ -2,11 +2,50 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TheCute Studio ✨</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
+    <title>Martha Cute Studio ✨</title>
+    <meta name="description" content="Realzando tu belleza natural" />
+    <meta name="theme-color" content="#ec4899" />
+    <link rel="manifest" href="/manifest.json" />
+    
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MarthaCute" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+      /* Evitamos el scroll elástico y ponemos el fondo base */
+      body {
+        margin: 0;
+        background-color: #fffafa; /* Rosa blanquecino muy suave */
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
   </head>
-  <body style="margin: 0; background-color: #000000;">
+  <body>
     <div id="root"></div>
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service Worker registrado ✨'))
+            .catch(err => console.log('Error al registrar SW', err));
+        });
+      }
+    </script>
+    
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

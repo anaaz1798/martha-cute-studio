@@ -37,36 +37,43 @@ export default function ServicesPage() {
         <h1 className="text-[12px] font-black uppercase tracking-[0.2em] text-center flex-1 mr-8">Martha Cute Studio</h1>
       </nav>
 
-      <main className="p-6 space-y-6">
-        {/* BANNER PRINCIPAL */}
-        <div className="bg-[#ec4899] rounded-[40px] text-white shadow-lg relative overflow-hidden flex items-center p-10 min-h-[160px]">
+      <main className="p-6 space-y-8">
+        {/* BANNER REFORMADO CON ESTRELLAS */}
+        <div className="bg-[#ec4899] rounded-[40px] text-white shadow-lg relative overflow-hidden flex items-center p-8 min-h-[130px]">
           <div className="relative z-10">
-            <h2 className="text-[40px] font-black uppercase leading-none tracking-tighter text-white">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-70 mb-1">Catálogo</p>
+            <h2 className="text-[28px] font-black uppercase leading-none tracking-tight text-white">
               Servicios
             </h2>
           </div>
-          <Sparkles className="absolute right-[-20px] bottom-[-20px] opacity-20" size={160} />
+          <Sparkles className="absolute right-[-10px] bottom-[-10px] opacity-20" size={120} />
         </div>
 
-        {/* LISTADO DE SERVICIOS */}
-        <div className="space-y-4">
+        {/* LISTADO DE CATEGORÍAS TIPO TARJETA */}
+        <div className="space-y-6">
           {loading ? (
             <p className="text-center py-10 text-[10px] font-black uppercase text-pink-300 tracking-widest">Cargando...</p>
           ) : (
             Object.keys(serviciosAgrupados).map((cat) => (
-              <div key={cat} className="space-y-2">
+              <div key={cat} className="space-y-4">
+                {/* LA CATEGORÍA AHORA ES UNA TARJETA MÁS ROBUSTA */}
                 <button 
                   onClick={() => setAbierto(abierto === cat ? null : cat)}
-                  className={`w-full flex items-center justify-between p-6 rounded-[30px] border-2 transition-all ${
-                    abierto === cat ? 'bg-gray-900 text-white border-gray-900 shadow-xl' : 'bg-white border-pink-50 text-gray-700'
+                  className={`w-full flex items-center justify-between p-7 rounded-[35px] transition-all duration-300 ${
+                    abierto === cat 
+                    ? 'bg-gray-900 text-white shadow-2xl scale-[1.02]' 
+                    : 'bg-white border border-pink-50 text-gray-700 shadow-md active:scale-95'
                   }`}
                 >
-                  <span className="text-[11px] font-black uppercase tracking-widest">{cat}</span>
-                  {abierto === cat ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  <span className="text-[13px] font-black uppercase tracking-[0.1em]">{cat}</span>
+                  <div className={`p-2 rounded-full transition-colors ${abierto === cat ? 'bg-pink-500' : 'bg-pink-50'}`}>
+                    {abierto === cat ? <ChevronUp size={18} className="text-white" /> : <ChevronDown size={18} className="text-pink-400" />}
+                  </div>
                 </button>
 
+                {/* CONTENIDO DE LA TARJETA (SERVICIOS) */}
                 {abierto === cat && (
-                  <div className="space-y-3 pt-2">
+                  <div className="space-y-3 px-1 animate-fadeIn">
                     {serviciosAgrupados[cat].map((s) => {
                       const necesitaPresupuesto = s.name.toLowerCase().includes('color');
 
@@ -84,11 +91,10 @@ export default function ServicesPage() {
                             </div>
                           </div>
 
-                          {/* EL BOTÓN ESTÁ INTEGRADO EN LA TARJETA */}
                           {necesitaPresupuesto ? (
                             <button 
                               onClick={() => window.open('https://wa.link/nkdmm8', '_blank')}
-                              className="bg-green-500 text-white p-4 rounded-full active:scale-90 shadow-md flex items-center justify-center"
+                              className="bg-green-500 text-white p-4 rounded-full active:scale-90 shadow-lg"
                             >
                               <MessageCircle size={20} />
                             </button>

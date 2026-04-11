@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../supabaseClient'; // Tu conexión de siempre
+import { supabase } from '../supabase'; // Tu conexión de siempre
 import { 
   Users, Calendar, LogOut, Sparkles, Plus, Key, 
   Trash2, Edit, Star, Camera, Phone, Save, Link as LinkIcon 

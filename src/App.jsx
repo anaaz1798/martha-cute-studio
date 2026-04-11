@@ -2,18 +2,27 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
 import ServicesPage from './pages/ServicesPage';
-import VitrinaPage from './pages/VitrinaPage'; // <-- Revisa que se llame así
-import EventsPage from './pages/EventsPage';   // <-- Revisa que se llame así
+import Reservar from './pages/Reservar'; // <-- Cambié el nombre para que coincida con tu archivo
+import VitrinaPage from './pages/VitrinaPage';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
+        {/* La página principal ahora es Servicios para que veas el banner */}
+        <Route path="/" element={<ServicesPage />} />
+        
+        {/* Ruta para el login de Martha */}
+        <Route path="/login" element={<LoginPage />} />
+        
+        {/* Ruta para el panel de administración */}
         <Route path="/admin" element={<AdminPage />} />
-        <Route path="/servicios" element={<ServicesPage />} />
+        
+        {/* ESTA ES LA RUTA QUE TE FALTABA CONECTAR */}
+        <Route path="/reservar" element={<Reservar />} />
+        
+        {/* Ruta para la vitrina de fotos */}
         <Route path="/vitrina" element={<VitrinaPage />} />
-        <Route path="/eventos" element={<EventsPage />} />
       </Routes>
     </Router>
   );

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronDown, ChevronUp, Clock, Calendar, MessageCircle } from 'lucide-react';
+import { ChevronLeft, ChevronDown, ChevronUp, Clock, Calendar, MessageCircle, Sparkles } from 'lucide-react';
 // Importamos la data que definimos en el Admin
 import { DATA_SERVICIOS } from './AdminPage'; 
 
@@ -33,6 +33,18 @@ export default function ServicesPage() {
       </nav>
 
       <main className="p-6 space-y-4">
+        
+        {/* === EL BANNER HERMOSÍSIMO QUE RECUPERAMOS === */}
+        <div className="bg-[#ec4899] p-10 rounded-[40px] text-white shadow-lg shadow-pink-100 relative overflow-hidden mb-8">
+          <div className="relative z-10">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Bienvenida a</p>
+            <h2 className="text-[24px] font-black uppercase leading-tight mt-1">Tu momento <br/> de brillar</h2>
+            <p className="text-[10px] mt-4 opacity-70 max-w-[200px]">Elige el servicio perfecto para realzar tu belleza natural.</p>
+          </div>
+          <Sparkles className="absolute right-[-20px] bottom-[-20px] opacity-15" size={160} />
+        </div>
+        {/* ============================================= */}
+
         {Object.keys(DATA_SERVICIOS).map((cat) => (
           <div key={cat} className="space-y-2">
             {/* Banner Desplegable (Categoría) */}
@@ -77,7 +89,7 @@ export default function ServicesPage() {
                 {cat === 'Cabello' && (
                    <button 
                     onClick={handlePresupuestoColor}
-                    className="w-full bg-green-50 border-2 border-dashed border-green-200 p-6 rounded-[35px] flex items-center justify-center gap-3 active:scale-95 transition-all group"
+                    className="w-full bg-green-50 border-2 border-dashed border-green-200 p-6 rounded-[35px] flex items-center justify-center gap-3 active:scale-95 transition-all group mt-2"
                    >
                     <div className="bg-green-500 text-white p-2 rounded-full shadow-md group-hover:rotate-12 transition-transform">
                       <MessageCircle size={18} />
@@ -95,7 +107,7 @@ export default function ServicesPage() {
       </main>
 
       {/* Footer de Asesoría */}
-      <div className="px-6 mb-10">
+      <div className="px-6 mb-10 mt-10">
         <div className="bg-pink-50 p-8 rounded-[40px] text-center border border-pink-100">
           <p className="text-[10px] font-black uppercase text-[#ec4899] tracking-widest">Martha Cute Studio</p>
           <p className="text-[9px] font-medium text-pink-300 mt-1 uppercase">Realzando tu belleza natural</p>

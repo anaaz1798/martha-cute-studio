@@ -8,14 +8,14 @@ import {
 // Data compartida con la página de servicios
 export const DATA_SERVICIOS = {
   'Pestañas': [
-    { id: 1, nombre: 'Lifting de Pestañas', precio: '$45', tiempo: '45 min', tlf: '12560000000' },
-    { id: 2, nombre: 'Pelo a Pelo', precio: '$60', tiempo: '90 min', tlf: '12560000000' }
+    { id: 1, nombre: 'Lifting de Pestañas', precio: '$45', tiempo: '45 min' },
+    { id: 2, nombre: 'Pelo a Pelo', precio: '$60', tiempo: '90 min' }
   ],
   'Cejas': [
-    { id: 3, nombre: 'Diseño + Depilación', precio: '$25', tiempo: '30 min', tlf: '12560000000' }
+    { id: 3, nombre: 'Diseño + Depilación', precio: '$25', tiempo: '30 min' }
   ],
   'Cabello': [
-    { id: 4, nombre: 'Corte Dama', precio: '$35', tiempo: '45 min', tlf: '12560000000' }
+    { id: 4, nombre: 'Corte Dama', precio: '$35', tiempo: '45 min' }
   ]
 };
 
@@ -23,14 +23,15 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState('citas');
 
-  // Estados de ejemplo para las nuevas secciones
   const [staff] = useState([{ id: 1, nombre: 'Martha', rol: 'Dueña', email: 'marthacutestudio@gmail.com' }]);
   const [vitrina] = useState([{ id: 1, titulo: 'Trabajo Realizado', url: 'https://via.placeholder.com/150' }]);
   const [citas] = useState([
-    { id: 1, cliente: 'Ana Cecilia', servicio: 'Lifting', fecha: '15 Abr', hora: '10:00 AM', telefono: '12560000000' }
+    { id: 1, cliente: 'Ana Cecilia', servicio: 'Lifting', fecha: '15 Abr', hora: '10:00 AM', telefono: '584121663968' }
   ]);
+  
+  // ESTADO PARA EVENTOS QUE SE ME HABÍA OLVIDADO
+  const [eventos] = useState([{ id: 1, titulo: 'Jornada de Cejas', fecha: '20 May' }]);
 
-  // Función Universal de WhatsApp (Usa el número que me diste para el remitente)
   const enviarRecordatorio = (cita) => {
     const mensaje = `Hola ${cita.cliente}, ✨ recordatorio de Martha Cute Studio para tu cita de ${cita.servicio} el ${cita.fecha} a las ${cita.hora}.`;
     const numLimpio = cita.telefono.replace(/\D/g, '');
@@ -39,22 +40,22 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] pb-32 font-sans text-gray-800">
-      {/* Navbar */}
       <nav className="bg-gray-800 text-white p-8 flex justify-between items-center sticky top-0 z-50 rounded-b-[40px] shadow-lg">
         <div className="flex flex-col">
           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-pink-400">Admin Panel</span>
           <span className="text-[14px] font-black uppercase tracking-widest">Martha Cute Studio</span>
         </div>
-        <button onClick={() => navigate('/')} className="p-3 bg-gray-700 rounded-full text-pink-400 transition-all active:scale-90">
+        <button onClick={() => navigate('/')} className="p-3 bg-gray-700 rounded-full text-pink-400 active:scale-90">
           <LogOut size={18} />
         </button>
       </nav>
 
-      {/* Menú Deslizable */}
+      {/* Menú Deslizable - YA CON EVENTOS DE VUELTA */}
       <div className="flex overflow-x-auto gap-4 mt-8 px-6 no-scrollbar">
         {[
           { id: 'citas', label: 'Citas', icon: <Calendar size={14}/> },
           { id: 'servicios', label: 'Servicios', icon: <Sparkles size={14}/> },
+          { id: 'eventos', label: 'Eventos', icon: <Star size={14}/> },
           { id: 'vitrina', label: 'Vitrina', icon: <Camera size={14}/> },
           { id: 'staff', label: 'Equipo', icon: <Key size={14}/> },
           { id: 'ajustes', label: 'Ajustes', icon: <LinkIcon size={14}/> }
@@ -73,7 +74,6 @@ export default function AdminPage() {
 
       <main className="max-w-md mx-auto p-6 mt-4">
         
-        {/* VISTA: CITAS CON WHATSAPP */}
         {tab === 'citas' && (
           <div className="space-y-4 animate-fadeIn">
             <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-2">Agenda</h2>
@@ -84,7 +84,7 @@ export default function AdminPage() {
                   <p className="text-[10px] font-bold text-[#ec4899] uppercase">{c.servicio}</p>
                   <p className="text-[10px] font-bold text-gray-300 mt-1">{c.hora} - {c.fecha}</p>
                 </div>
-                <button onClick={() => enviarRecordatorio(c)} className="bg-green-50 text-green-600 p-4 rounded-full active:scale-90 transition-all">
+                <button onClick={() => enviarRecordatorio(c)} className="bg-green-50 text-green-600 p-4 rounded-full active:scale-90">
                   <Phone size={20} />
                 </button>
               </div>
@@ -92,7 +92,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* VISTA: SERVICIOS AGRUPADOS */}
         {tab === 'servicios' && (
           <div className="space-y-8 animate-fadeIn">
             {Object.keys(DATA_SERVICIOS).map(cat => (
@@ -116,7 +115,27 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* VISTA: EQUIPO (LLAVES) */}
+        {/* VISTA DE EVENTOS RECUPERADA */}
+        {tab === 'eventos' && (
+          <div className="space-y-4 animate-fadeIn">
+            <h2 className="text-[11px] font-black uppercase tracking-widest text-gray-400 ml-2">Próximos Eventos</h2>
+            {eventos.map(e => (
+              <div key={e.id} className="bg-white p-6 rounded-[35px] border border-gray-100 flex justify-between items-center shadow-sm">
+                <div>
+                  <p className="text-[12px] font-black uppercase">{e.titulo}</p>
+                  <p className="text-[10px] font-bold text-pink-400 uppercase">{e.fecha}</p>
+                </div>
+                <div className="flex gap-2 text-gray-200">
+                  <Edit size={16}/> <Trash2 size={16}/>
+                </div>
+              </div>
+            ))}
+            <button className="w-full border-2 border-dashed border-gray-200 p-6 rounded-[35px] flex items-center justify-center text-gray-300 active:scale-95 transition-all">
+              <Plus size={20}/>
+            </button>
+          </div>
+        )}
+
         {tab === 'staff' && (
           <div className="space-y-6 animate-fadeIn">
             <div className="bg-gray-800 p-8 rounded-[40px] text-white">
@@ -133,7 +152,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* VISTA: VITRINA */}
         {tab === 'vitrina' && (
           <div className="grid grid-cols-2 gap-4 animate-fadeIn">
             {vitrina.map(img => (
@@ -146,7 +164,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* VISTA: AJUSTES (REDES) */}
         {tab === 'ajustes' && (
           <div className="bg-white p-8 rounded-[40px] border border-gray-100 space-y-4 animate-fadeIn">
             <h3 className="text-[11px] font-black uppercase tracking-widest text-gray-400 mb-2">Redes Sociales</h3>

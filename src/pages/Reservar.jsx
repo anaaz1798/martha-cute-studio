@@ -1,24 +1,45 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { Calendar as CalendarIcon, Clock, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, CheckCircle2, User, Phone } from 'lucide-react';
+import { supabase } from '../supabase';
 
 export default function ReservarPage() {
+  const navigate = useNavigate();
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
+  const [nombre, setNombre] = useState('');
+  const [telefono, setTelefono] = useState('');
   const [confirmado, setConfirmado] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const horasDisponibles = [
     '09:00 AM', '10:00 AM', '11:00 AM', 
     '02:00 PM', '03:00 PM', '04:00 PM'
   ];
 
-  const handleReserva = () => {
-    if (fecha && hora) {
-      setConfirmado(true);
-      // Aquí luego conectamos con Supabase para guardar la cita
-    } else {
-      alert("Porfa, selecciona fecha y hora");
+  const handleReserva = async () => {
+    if (!fecha || !hora || !nombre || !telefono) {
+      alert("¡Epa! No dejes campos vacíos. Necesito saber quién eres y cuándo vienes.");
+      return;
     }
+
+    setLoading(true);
+
+    // Conectamos con Supabase para guardar la cita de verdad
+    const { error } = await supabase.from('appointments').insert([{
+      appointment_time: `${fecha}T${hora.includes('PM') ? parseInt(hora)+12 : hora.split(':')[0]}:00:00Z`, 
+      status: 'pending',
+      notes: `Cliente: ${nombre} - Tel: ${telefono}` // Aquí guardamos quién es
+    }]);
+
+    if (!error) {
+      setConfirmado(true);
+    } else {
+      console.error(error);
+      alert("Coño, hubo un error al guardar. Revisa la conexión.");
+    }
+    setLoading(false);
   };
 
   if (confirmado) {
@@ -28,11 +49,11 @@ export default function ReservarPage() {
           <CheckCircle2 className="w-20 h-20 text-[#ec4899] mb-6" />
           <h2 className="font-black text-[18px] uppercase text-gray-800 tracking-widest">¡Cita Agendada!</h2>
           <p className="text-[12px] text-gray-500 mt-4 leading-relaxed">
-            Te esperamos el día <span className="font-black text-[#ec4899]">{fecha}</span> a las <span className="font-black text-[#ec4899]">{hora}</span>.
+            Te esperamos, <span className="font-black text-[#ec4899]">{nombre}</span>, el día <span className="font-black text-[#ec4899]">{fecha}</span> a las <span className="font-black text-[#ec4899]">{hora}</span>.
           </p>
           <button 
-            onClick={() => window.location.href = '/'}
-            className="mt-10 bg-[#ec4899] text-white px-10 py-4 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-lg shadow-pink-100"
+            onClick={() => navigate('/')}
+            className="mt-10 bg-[#ec4899] text-white px-10 py-4 rounded-full text-[11px] font-black uppercase tracking-[0.2em] shadow-lg"
           >
             Volver al inicio
           </button>
@@ -57,7 +78,7 @@ export default function ReservarPage() {
           </div>
           <input 
             type="date" 
-            className="w-full p-4 bg-pink-50/30 border-2 border-pink-100 rounded-[20px] text-[13px] font-bold text-gray-700 outline-none focus:border-[#ec4899] transition-all"
+            className="w-full p-4 bg-pink-50/30 border-2 border-pink-100 rounded-[20px] text-[13px] font-bold text-gray-700 outline-none"
             onChange={(e) => setFecha(e.target.value)}
           />
         </section>
@@ -74,9 +95,7 @@ export default function ReservarPage() {
                 key={h}
                 onClick={() => setHora(h)}
                 className={`py-4 rounded-[20px] text-[10px] font-black uppercase tracking-widest transition-all ${
-                  hora === h 
-                  ? 'bg-[#ec4899] text-white shadow-lg shadow-pink-200 scale-95' 
-                  : 'bg-[#fffafa] text-gray-400 border border-pink-50'
+                  hora === h ? 'bg-[#ec4899] text-white shadow-lg' : 'bg-[#fffafa] text-gray-400 border border-pink-50'
                 }`}
               >
                 {h}
@@ -85,12 +104,35 @@ export default function ReservarPage() {
           </div>
         </section>
 
+        {/* PASO 3: DATOS DE CONTACTO (¡Lo que faltaba!) */}
+        <section className="bg-white rounded-[40px] p-10 shadow-sm border-2 border-[#fbcfe8] space-y-4">
+          <div className="flex items-center gap-3 mb-4 text-[#ec4899]">
+            <User className="w-5 h-5" />
+            <h3 className="font-black text-[12px] uppercase tracking-widest">3. Tus Datos</h3>
+          </div>
+          <input 
+            type="text"
+            placeholder="Nombre Completo"
+            className="w-full p-4 bg-pink-50/30 border-2 border-pink-100 rounded-[20px] text-[13px] font-bold outline-none"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+          />
+          <input 
+            type="tel"
+            placeholder="Teléfono"
+            className="w-full p-4 bg-pink-50/30 border-2 border-pink-100 rounded-[20px] text-[13px] font-bold outline-none"
+            value={telefono}
+            onChange={(e) => setTelefono(e.target.value)}
+          />
+        </section>
+
         {/* BOTÓN FINAL */}
         <button 
           onClick={handleReserva}
-          className="w-full bg-[#ec4899] text-white py-5 rounded-full text-[12px] font-black uppercase tracking-[0.3em] shadow-xl shadow-pink-100 active:scale-95 transition-all"
+          disabled={loading}
+          className="w-full bg-[#ec4899] text-white py-5 rounded-full text-[12px] font-black uppercase tracking-[0.3em] shadow-xl active:scale-95 disabled:opacity-50"
         >
-          Confirmar Reserva
+          {loading ? 'Guardando...' : 'Confirmar Reserva'}
         </button>
 
       </main>
